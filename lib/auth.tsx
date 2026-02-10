@@ -30,11 +30,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const login = async (username: string, password: string) => {
-    const response = await api.login(username, password);
-    localStorage.setItem("access_token", response.access);
-    localStorage.setItem("refresh_token", response.refresh);
-    const userData = await api.getCurrentUser();
-    setUser(userData);
+    console.log("Attempting login with:", username, password);
+    try {
+      const response = await api.login(username, password);
+      console.log("Login response:", response);
+      // Try both formats: Django (access) and FastAPI (access_token)
+      const token = response.access || response.access_token;
+      if (!token) {
+        throw new Error("No token in response");
+      }
+      localStorage.setItem("access_token", token);
+      localStorage.setItem("refresh_token", response.refresh || response.refresh_token || "");
+      const userData = await api.getCurrentUser();
+      console.log("User data:", userData);
+      setUser(userData);
+    } catch (error) {
+      console.error("Login failed:", error);
+      throw error;
+    }
   };
 
   const logout = () => {

@@ -11,17 +11,34 @@ class ApiClient {
       ...options.headers,
     };
 
+    console.log("API Request:", this.baseURL + endpoint, options.method || "GET", { token: !!token });
     const response = await fetch(`${this.baseURL}${endpoint}`, {
       ...options,
       headers,
     });
+    console.log("API Response status:", response.status, response.statusText);
 
     if (response.status === 401) {
-      // Handle token refresh or redirect to login
-      console.log("Unauthorized, redirect to login");
+      console.log("Unauthorized, clearing token");
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("refresh_token");
+      // Don't try to parse JSON for 401, might be HTML
+      throw new Error("Unauthorized");
     }
 
-    return response.json();
+    const contentType = response.headers.get("content-type");
+    if (contentType && contentType.includes("application/json")) {
+      return response.json();
+    } else {
+      // Handle non-JSON responses
+      const text = await response.text();
+      console.log("Non-JSON response:", text);
+      if (response.ok) {
+        return { message: text };
+      } else {
+        throw new Error(`HTTP ${response.status}: ${text}`);
+      }
+    }
   }
 
   // Authentication
