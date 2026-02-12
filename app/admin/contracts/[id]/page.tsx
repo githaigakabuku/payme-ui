@@ -22,7 +22,7 @@ interface Contract {
     name: string;
     company: string;
     email: string;
-  } | null;
+  } | string | null;
   title: string;
   description: string;
   is_signed: boolean;
@@ -45,6 +45,18 @@ export default function ContractDetailPage() {
   const [loading, setLoading] = useState(true);
   const [selectedVersion, setSelectedVersion] = useState<ContractVersion | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [clientDetails, setClientDetails] = useState<{
+    id: string;
+    name: string;
+    company: string;
+    email: string;
+  } | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editForm, setEditForm] = useState({
+    title: "",
+    description: "",
+    content: "",
+  });
 
   useEffect(() => {
     if (!isLoading && !user) {
@@ -58,6 +70,21 @@ export default function ContractDetailPage() {
       const data = await api.getContract(contractId);
       setContract(data);
       setSelectedVersion(data.current_version);
+      setEditForm({
+        title: data?.title || "",
+        description: data?.description || "",
+        content: data?.current_version?.content || "",
+      });
+      if (data?.client) {
+        if (typeof data.client === "string") {
+          const client = await api.getClient(data.client);
+          setClientDetails(client || null);
+        } else {
+          setClientDetails(data.client);
+        }
+      } else {
+        setClientDetails(null);
+      }
     } catch (error) {
       console.error("Failed to fetch contract:", error);
       setError("Failed to load contract details. Please try again.");
@@ -100,6 +127,23 @@ export default function ContractDetailPage() {
       fetchContract();
     } catch (error) {
       console.error("Failed to create version:", error);
+    }
+  };
+
+  const handleSaveDraft = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      setError(null);
+      await api.updateContract(contractId, {
+        title: editForm.title,
+        description: editForm.description,
+        content: editForm.content,
+      });
+      setIsEditing(false);
+      fetchContract();
+    } catch (error) {
+      console.error("Failed to update contract:", error);
+      setError("Failed to update draft. Please try again.");
     }
   };
 
@@ -156,8 +200,8 @@ export default function ContractDetailPage() {
   if (!contract) return null;
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow">
+    <div className="min-h-screen bg-gradient-to-br from-sky-950 via-blue-950 to-cyan-900">
+      <nav className="bg-white/80 backdrop-blur border-b border-white/20 shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex">
@@ -218,15 +262,15 @@ export default function ContractDetailPage() {
             </Link>
           </div>
 
-          <div className="bg-white shadow rounded-lg">
+          <div className="bg-white/80 backdrop-blur shadow-xl border border-white/30 rounded-2xl">
             <div className="px-6 py-4 border-b border-gray-200">
               <div className="flex justify-between items-start">
                 <div>
-                  <h2 className="text-2xl font-bold text-gray-900">{contract.title || 'Untitled Contract'}</h2>
+                  <h2 className="text-2xl font-bold text-gray-900">{contract.title || "Untitled Contract"}</h2>
                   <p className="text-gray-600 mt-1">{contract.description || 'No description available'}</p>
                   <div className="mt-2 flex items-center space-x-4">
                     <span className="text-sm text-gray-500">
-                      Client: {contract.client ? `${contract.client.name} (${contract.client.company})` : 'Unknown Client'}
+                      Client: {clientDetails ? `${clientDetails.name} (${clientDetails.company})` : "Unknown Client"}
                     </span>
                     <span
                       className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
@@ -271,6 +315,12 @@ export default function ContractDetailPage() {
                         New Version
                       </button>
                       <button
+                        onClick={() => setIsEditing(true)}
+                        className="bg-sky-500 hover:bg-sky-600 text-white px-4 py-2 rounded-md text-sm font-medium"
+                      >
+                        Edit Draft
+                      </button>
+                      <button
                         onClick={handleSignContract}
                         className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md text-sm font-medium"
                       >
@@ -291,6 +341,57 @@ export default function ContractDetailPage() {
             </div>
 
             <div className="px-6 py-4">
+              {isEditing && !contract.is_signed && (
+                <div className="mb-6 bg-white/90 backdrop-blur rounded-2xl border border-white/40 p-6 shadow-lg">
+                  <h3 className="text-lg font-medium text-gray-900 mb-4">Edit Draft</h3>
+                  <form onSubmit={handleSaveDraft} className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Title</label>
+                      <input
+                        type="text"
+                        value={editForm.title}
+                        onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+                        className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Description</label>
+                      <input
+                        type="text"
+                        value={editForm.description}
+                        onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+                        className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Content</label>
+                      <textarea
+                        value={editForm.content}
+                        onChange={(e) => setEditForm({ ...editForm, content: e.target.value })}
+                        rows={10}
+                        className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500"
+                        required
+                      />
+                    </div>
+                    <div className="flex justify-end space-x-3">
+                      <button
+                        type="button"
+                        onClick={() => setIsEditing(false)}
+                        className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-md text-sm font-medium"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        className="bg-sky-600 hover:bg-sky-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+                      >
+                        Save Draft
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              )}
               <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
                 <div className="lg:col-span-1">
                   <h3 className="text-lg font-medium text-gray-900 mb-4">Versions</h3>

@@ -64,8 +64,14 @@ export default function ContractsPage() {
     try {
       setError(null);
       const data = await api.getContracts();
-      // Ensure data is always an array
-      const contractsArray = Array.isArray(data) ? data : (data ? [data] : []);
+      // Ensure data is always an array (supports DRF pagination)
+      const contractsArray = Array.isArray(data)
+        ? data
+        : Array.isArray(data?.results)
+          ? data.results
+          : data
+            ? [data]
+            : [];
       setContracts(contractsArray);
     } catch (error) {
       console.error("Failed to fetch contracts:", error);
@@ -79,8 +85,14 @@ export default function ContractsPage() {
   const fetchClients = async () => {
     try {
       const data = await api.getClients();
-      // Ensure data is always an array
-      const clientsArray = Array.isArray(data) ? data : (data ? [data] : []);
+      // Ensure data is always an array (supports DRF pagination)
+      const clientsArray = Array.isArray(data)
+        ? data
+        : Array.isArray(data?.results)
+          ? data.results
+          : data
+            ? [data]
+            : [];
       setClients(clientsArray);
     } catch (error) {
       console.error("Failed to fetch clients:", error);
@@ -141,8 +153,8 @@ export default function ContractsPage() {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow">
+    <div className="min-h-screen bg-gradient-to-br from-sky-950 via-blue-950 to-cyan-900">
+      <nav className="bg-white/80 backdrop-blur border-b border-white/20 shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex">
@@ -222,17 +234,17 @@ export default function ContractsPage() {
             </div>
           )}
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">Contracts</h2>
+            <h2 className="text-2xl font-bold text-white">Contracts</h2>
             <button
               onClick={() => setShowForm(true)}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+              className="bg-sky-600 hover:bg-sky-700 text-white px-4 py-2 rounded-md text-sm font-medium shadow-lg"
             >
               Create Contract
             </button>
           </div>
 
           {showForm && (
-            <div className="bg-white shadow rounded-lg p-6 mb-6">
+            <div className="bg-white/80 backdrop-blur shadow-xl rounded-2xl border border-white/30 p-6 mb-6">
               <h3 className="text-lg font-medium text-gray-900 mb-4">Create New Contract</h3>
               <form onSubmit={handleCreateContract} className="space-y-4">
                 <div>
@@ -300,7 +312,7 @@ export default function ContractsPage() {
             </div>
           )}
 
-          <div className="bg-white shadow overflow-hidden sm:rounded-md">
+          <div className="bg-white/80 backdrop-blur shadow-xl border border-white/30 overflow-hidden sm:rounded-2xl">
             <ul className="divide-y divide-gray-200">
               {Array.isArray(contracts) && contracts.map((contract) => (
                 <li key={contract.id} className="px-6 py-4">
