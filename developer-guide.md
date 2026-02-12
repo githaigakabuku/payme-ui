@@ -99,6 +99,9 @@ const contractData = {
 // POST /api/contracts/{id}/sign/ - Sign contract (makes immutable)
 // POST /api/contracts/{id}/revoke/ - Revoke signed contract
 // POST /api/contracts/{id}/create_version/ - Create new version (if unsigned)
+
+// Note: after creating a contract or version the backend generates a PDF
+// and sets the `pdf_url` for the `ContractVersion` (e.g. `/pdfs/{version.id}/`).
 ```
 
 #### Payment Milestones
@@ -165,6 +168,13 @@ const milestoneData = {
 - `POST /api/contracts/{id}/create_version/` - New version
 - `GET /api/contracts/{id}/versions/` - List versions
 
+- **Contract Templates (Admin Only)**
+  - `GET /api/contracts/templates/` - List templates
+  - `POST /api/contracts/templates/` - Create template
+  - `GET /api/contracts/templates/{id}/` - Get template
+  - `PUT /api/contracts/templates/{id}/` - Update template
+  - `DELETE /api/contracts/templates/{id}/` - Delete template
+
 ### Payments (Admin Only)
 
 - `GET /api/payments/milestones/` - List milestones
@@ -174,7 +184,13 @@ const milestoneData = {
 - `DELETE /api/payments/milestones/{id}/` - Delete milestone
 - `POST /api/payments/milestones/{id}/create_checkout_session/` - Create Stripe checkout
 - `POST /api/payments/milestones/{id}/refund/` - Refund payment
-- `GET /api/payments/stripe-events/` - View webhook events
+- `GET /api/payments/events/` - View webhook events (admin read-only)
+- `GET /api/payments/tiers/` - List subscription tiers
+- `POST /api/payments/tiers/` - Create subscription tier
+- `GET /api/payments/tiers/{id}/` - Get subscription tier
+- `GET /api/payments/invoices/` - List invoices
+- `POST /api/payments/invoices/` - Create invoice
+- `GET /api/payments/invoices/{id}/` - Get invoice
 
 ### Audit (Admin Only)
 
@@ -184,7 +200,8 @@ const milestoneData = {
 
 - `GET /api/public/clients/{uuid}/{token}/` - Client contract view
 - `GET /api/public/clients/{uuid}/{token}/info/` - Client info only
-- `POST /api/payments/stripe/webhook/` - Stripe webhook handler
+- `GET /api/public/clients/{uuid}/{token}/info/` - Client info only
+- `POST /api/payments/webhook/stripe/` - Stripe webhook handler
 
 ## Data Structures
 
@@ -284,8 +301,8 @@ const milestoneData = {
 #### 3. Integration Points
 
 - **Stripe Checkout**: Handle payment flows, success/cancel redirects
-- **PDF Download**: Contract PDFs (backend generates them)
-- **Email Notifications**: (Future - backend supports Celery)
+- **PDF Generation & Download**: The backend now generates professional contract PDFs using WeasyPrint. After creating a contract or a new version the backend generates a PDF and exposes it at `/pdfs/{version.id}/` (the `ContractVersion.pdf_url` is set to `/pdfs/{version.id}/`). Frontend can link to that URL for downloads or in-browser viewing.
+- **Email Notifications (sent async)**: The backend sends transactional emails via Celery (SendGrid configured). Emails are sent for events such as contract signing, invoice creation, and payment reminders. Email tasks use the `FRONTEND_URL` setting to build links back to the frontend (e.g. contract, payment, invoice pages).
 
 ### UI/UX Considerations
 
@@ -404,6 +421,14 @@ DATABASE_URL=postgresql://user:pass@localhost:5432/db
 STRIPE_PUBLIC_KEY=pk_test_...
 STRIPE_SECRET_KEY=sk_test_...
 STRIPE_WEBHOOK_SECRET=whsec_...
+# Frontend base URL used in transactional emails (e.g. https://app.example.com)
+FRONTEND_URL=http://localhost:3000
+# Celery configuration (broker/result backend)
+CELERY_BROKER_URL=redis://localhost:6379/0
+CELERY_RESULT_BACKEND=redis://localhost:6379/0
+# Optional: SendGrid or SMTP API key used by email service
+SENDGRID_API_KEY=your-sendgrid-api-key
+DEFAULT_FROM_EMAIL=no-reply@example.com
 ```
 
 ### Running the Backend

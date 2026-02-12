@@ -3,6 +3,7 @@
 import { useAuth } from "@/lib/auth";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import Link from "next/link";
 
 export default function AdminDashboard() {
   const { user, logout, isLoading } = useAuth();
@@ -51,12 +52,12 @@ export default function AdminDashboard() {
                 >
                   Clients
                 </a>
-                <a
+                <Link
                   href="/admin/contracts"
                   className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
                 >
                   Contracts
-                </a>
+                </Link>
                 <a
                   href="/admin/payments"
                   className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
