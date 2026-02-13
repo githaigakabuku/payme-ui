@@ -262,14 +262,14 @@ export default function ContractDetailPage() {
             </Link>
           </div>
 
-          <div className="bg-white/80 backdrop-blur shadow-xl border border-white/30 rounded-2xl">
-            <div className="px-6 py-4 border-b border-gray-200">
+          <div className="bg-white/10 backdrop-blur shadow-xl border border-white/30 rounded-2xl">
+            <div className="px-6 py-4 border-b border-black/10">
               <div className="flex justify-between items-start">
                 <div>
-                  <h2 className="text-2xl font-bold text-gray-900">{contract.title || "Untitled Contract"}</h2>
-                  <p className="text-gray-600 mt-1">{contract.description || 'No description available'}</p>
+                  <h2 className="text-2xl font-bold text-black">{contract.title || "Untitled Contract"}</h2>
+                  <p className="text-black mt-1">{contract.description || 'No description available'}</p>
                   <div className="mt-2 flex items-center space-x-4">
-                    <span className="text-sm text-gray-500">
+                    <span className="text-sm text-black">
                       Client: {clientDetails ? `${clientDetails.name} (${clientDetails.company})` : "Unknown Client"}
                     </span>
                     <span
@@ -284,7 +284,7 @@ export default function ContractDetailPage() {
                       {contract.is_revoked ? "Revoked" : contract.is_signed ? "Signed" : "Draft"}
                     </span>
                   </div>
-                  <div className="mt-2 text-xs text-gray-500">
+                  <div className="mt-2 text-xs text-black">
                     Created: {new Date(contract.created_at).toLocaleDateString()}
                     {contract.signed_at && ` | Signed: ${new Date(contract.signed_at).toLocaleDateString()}`}
                     {contract.is_revoked && contract.revoked_at && ` | Revoked: ${new Date(contract.revoked_at).toLocaleDateString()}`}
@@ -301,7 +301,7 @@ export default function ContractDetailPage() {
                       href={`http://localhost:8000${contract.current_version.pdf_url}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium"
+                      className="bg-sky-400/80 hover:bg-sky-400 text-slate-900 px-4 py-2 rounded-xl text-sm font-semibold border border-white/40 backdrop-blur-md transition-all duration-200 hover:shadow-sky-300/40 active:scale-[0.98]"
                     >
                       View PDF
                     </a>
@@ -310,19 +310,19 @@ export default function ContractDetailPage() {
                     <>
                       <button
                         onClick={handleCreateVersion}
-                        className="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-md text-sm font-medium"
+                        className="bg-violet-300/80 hover:bg-violet-300 text-slate-900 px-4 py-2 rounded-xl text-sm font-semibold border border-white/40 backdrop-blur-md transition-all duration-200 hover:shadow-violet-300/40 active:scale-[0.98]"
                       >
                         New Version
                       </button>
                       <button
                         onClick={() => setIsEditing(true)}
-                        className="bg-sky-500 hover:bg-sky-600 text-white px-4 py-2 rounded-md text-sm font-medium"
+                        className="bg-sky-400/80 hover:bg-sky-400 text-slate-900 px-4 py-2 rounded-xl text-sm font-semibold border border-white/40 backdrop-blur-md transition-all duration-200 hover:shadow-sky-300/40 active:scale-[0.98]"
                       >
                         Edit Draft
                       </button>
                       <button
                         onClick={handleSignContract}
-                        className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md text-sm font-medium"
+                        className="bg-emerald-300/80 hover:bg-emerald-300 text-black-900 px-4 py-2 rounded-xl text-sm font-semibold border border-white/40 backdrop-blur-md transition-all duration-200 hover:shadow-emerald-300/40 active:scale-[0.98]"
                       >
                         Sign Contract
                       </button>
@@ -331,7 +331,7 @@ export default function ContractDetailPage() {
                   {contract.is_signed && !contract.is_revoked && (
                     <button
                       onClick={handleRevokeContract}
-                      className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium"
+                      className="bg-rose-300/80 hover:bg-rose-300 text-slate-900 px-4 py-2 rounded-xl text-sm font-semibold border border-white/40 backdrop-blur-md transition-all duration-200 hover:shadow-rose-300/40 active:scale-[0.98]"
                     >
                       Revoke Contract
                     </button>
@@ -339,38 +339,38 @@ export default function ContractDetailPage() {
                 </div>
               </div>
             </div>
-
+                      {/*these is the edit draft contract page  */}
             <div className="px-6 py-4">
               {isEditing && !contract.is_signed && (
                 <div className="mb-6 bg-white/90 backdrop-blur rounded-2xl border border-white/40 p-6 shadow-lg">
-                  <h3 className="text-lg font-medium text-gray-900 mb-4">Edit Draft</h3>
+                  <h3 className="text-lg font-medium text-black mb-4">Edit Draft</h3>
                   <form onSubmit={handleSaveDraft} className="space-y-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Title</label>
+                      <label className="block text-sm font-medium text-black">Title</label>
                       <input
                         type="text"
                         value={editForm.title}
                         onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
-                        className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500"
+                        className="mt-1 block w-full border-sky-200/80 rounded-xl shadow-sm focus:ring-sky-400 focus:border-sky-400 bg-white/80 text-black backdrop-blur"
                         required
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Description</label>
+                      <label className="block text-sm font-medium text-black">Description</label>
                       <input
                         type="text"
                         value={editForm.description}
                         onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
-                        className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500"
+                        className="mt-1 block w-full border-sky-200/80 rounded-xl shadow-sm focus:ring-sky-400 focus:border-sky-400 bg-orange-100 text-green-900 backdrop-blur"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Content</label>
+                      <label className="block text-sm font-medium text-black">Content</label>
                       <textarea
                         value={editForm.content}
                         onChange={(e) => setEditForm({ ...editForm, content: e.target.value })}
                         rows={10}
-                        className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500"
+                        className="mt-1 block w-full border-sky-200/80 rounded-xl shadow-sm focus:ring-sky-400 focus:border-sky-400 bg-white text-green-900 backdrop-blur"
                         required
                       />
                     </div>
@@ -378,13 +378,13 @@ export default function ContractDetailPage() {
                       <button
                         type="button"
                         onClick={() => setIsEditing(false)}
-                        className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-md text-sm font-medium"
+                        className="bg-white/70 hover:bg-white text-slate-800 px-4 py-2 rounded-xl text-sm font-semibold border border-white/50 backdrop-blur-md transition-all duration-200 hover:shadow"
                       >
                         Cancel
                       </button>
                       <button
                         type="submit"
-                        className="bg-sky-600 hover:bg-sky-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+                        className="bg-sky-400/80 hover:bg-sky-400 text-slate-900 px-4 py-2 rounded-xl text-sm font-semibold border border-white/40 backdrop-blur-md transition-all duration-200 hover:shadow-sky-300/40 active:scale-[0.98]"
                       >
                         Save Draft
                       </button>
@@ -394,7 +394,7 @@ export default function ContractDetailPage() {
               )}
               <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
                 <div className="lg:col-span-1">
-                  <h3 className="text-lg font-medium text-gray-900 mb-4">Versions</h3>
+                  <h3 className="text-lg font-medium text-black mb-4">Versions</h3>
                   <div className="space-y-2">
                     {contract.versions && contract.versions.length > 0 ? (
                       contract.versions.map((version) => (
@@ -408,22 +408,22 @@ export default function ContractDetailPage() {
                           }`}
                         >
                           <div className="font-medium">Version {version.version_number}</div>
-                          <div className="text-xs text-gray-500">
+                          <div className="text-xs text-black">
                             {new Date(version.created_at).toLocaleDateString()}
                             {version.is_current && " (Current)"}
                           </div>
                         </button>
                       ))
                     ) : (
-                      <div className="text-sm text-gray-500">No versions available</div>
+                      <div className="text-sm text-black">No versions available</div>
                     )}
                   </div>
                 </div>
 
                 <div className="lg:col-span-3">
-                  <h3 className="text-lg font-medium text-gray-900 mb-4">Contract Content</h3>
+                  <h3 className="text-lg font-medium text-black mb-4">Contract Content</h3>
                   {selectedVersion ? (
-                    <div className="bg-gray-50 rounded-lg p-6">
+                    <div className="bg-black-50 rounded-lg p-6">
                       <div className="prose max-w-none">
                         <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed">
                           {selectedVersion.content}
@@ -431,7 +431,7 @@ export default function ContractDetailPage() {
                       </div>
                     </div>
                   ) : (
-                    <div className="bg-gray-50 rounded-lg p-6 text-center text-gray-500">
+                    <div className="bg-gray-50 rounded-lg p-6 text-center text-black">
                       Select a version to view content
                     </div>
                   )}

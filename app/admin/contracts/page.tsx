@@ -237,7 +237,7 @@ export default function ContractsPage() {
             <h2 className="text-2xl font-bold text-white">Contracts</h2>
             <button
               onClick={() => setShowForm(true)}
-              className="bg-sky-600 hover:bg-sky-700 text-white px-4 py-2 rounded-md text-sm font-medium shadow-lg"
+              className="bg-sky-400/80 hover:bg-sky-400 text-slate-900 px-4 py-2 rounded-xl text-sm font-semibold shadow-lg border border-white/40 backdrop-blur-md transition-all duration-200 hover:shadow-sky-300/40 active:scale-[0.98]"
             >
               Create Contract
             </button>
@@ -245,14 +245,14 @@ export default function ContractsPage() {
 
           {showForm && (
             <div className="bg-white/80 backdrop-blur shadow-xl rounded-2xl border border-white/30 p-6 mb-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Create New Contract</h3>
+              <h3 className="text-lg font-medium text-black mb-4">Create New Contract</h3>
               <form onSubmit={handleCreateContract} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Client</label>
+                  <label className="block text-sm font-medium text-black">Client</label>
                   <select
                     value={formData.client}
                     onChange={(e) => setFormData({ ...formData, client: e.target.value })}
-                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                    className="mt-1 block w-full border-sky rounded-xl text-black  shadow-sm focus:ring-sky-400 focus:border-sky-400 bg-white/80 backdrop-blur p-3"
                     required
                   >
                     <option value="">Select a client</option>
@@ -264,31 +264,31 @@ export default function ContractsPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Title</label>
+                  <label className="block text-sm font-medium text-black p-1">Title</label>
                   <input
                     type="text"
                     value={formData.title}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                    className="mt-1 block w-full border-sky-200/80 rounded-xll shadow-sm focus:ring-sky-400 focus:border-sky-400 bg-white/80 text-black backdrop-blur p-3"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Description</label>
+                  <label className="block text-sm font-medium text-black">Description</label>
                   <input
                     type="text"
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                    className="mt-1 block w-full border-sky-200/80 rounded-xll text-black shadow-sm focus:ring-sky-400 focus:border-sky-400 bg-white/80 backdrop-blur p-3"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Content</label>
+                  <label className="block text-sm font-medium text-black">Content</label>
                   <textarea
                     value={formData.content}
                     onChange={(e) => setFormData({ ...formData, content: e.target.value })}
                     rows={10}
-                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                    className="mt-1 block w-full border-sky-200/80 text-black rounded-xll shadow-sm focus:ring-sky-400 focus:border-sky-400 bg-white/80 backdrop-blur p-3"
                     placeholder="Enter contract content..."
                     required
                   />
@@ -297,13 +297,13 @@ export default function ContractsPage() {
                   <button
                     type="button"
                     onClick={() => setShowForm(false)}
-                    className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-md text-sm font-medium"
+                    className="bg-white/70 hover:bg-white text-slate-800 px-4 py-2 rounded-xl text-sm font-semibold border border-white/50 backdrop-blur-md transition-all duration-200 hover:shadow"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+                    className="bg-sky-400/80 hover:bg-sky-400 text-slate-900 px-4 py-2 rounded-xl text-sm font-semibold shadow-lg border border-white/40 backdrop-blur-md transition-all duration-200 hover:shadow-sky-300/40 active:scale-[0.98]"
                   >
                     Create Contract
                   </button>
@@ -315,7 +315,7 @@ export default function ContractsPage() {
           <div className="bg-white/80 backdrop-blur shadow-xl border border-white/30 overflow-hidden sm:rounded-2xl">
             <ul className="divide-y divide-gray-200">
               {Array.isArray(contracts) && contracts.map((contract) => (
-                <li key={contract.id} className="px-6 py-4">
+                <li key={contract?.id || Math.random()} className="px-6 py-4">
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
                       <div className="flex items-center">
@@ -332,8 +332,8 @@ export default function ContractsPage() {
                           {contract?.is_revoked ? "Revoked" : contract?.is_signed ? "Signed" : "Draft"}
                         </span>
                       </div>
-                      <p className="text-sm text-gray-600 mt-1">{contract?.description || 'No description'}</p>
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-sm text-black mt-1">{contract?.description || 'No description'}</p>
+                      <p className="text-xs text-black mt-1">
                         Created: {contract?.created_at ? new Date(contract.created_at).toLocaleDateString() : 'Unknown'}
                         {contract?.signed_at && ` | Signed: ${new Date(contract.signed_at).toLocaleDateString()}`}
                       </p>
@@ -344,7 +344,7 @@ export default function ContractsPage() {
                           href={`http://localhost:8000${contract.current_version.pdf_url}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm"
+                          className="bg-sky-400/80 hover:bg-sky-400 text-slate-900 px-3 py-1 rounded-lg text-sm font-semibold border border-white/40 backdrop-blur-md transition-all duration-200 hover:shadow-sky-300/40 active:scale-[0.98]"
                         >
                           View PDF
                         </a>
@@ -353,13 +353,13 @@ export default function ContractsPage() {
                         <>
                           <button
                             onClick={() => handleCreateVersion(contract.id)}
-                            className="bg-purple-500 hover:bg-purple-600 text-white px-3 py-1 rounded text-sm"
+                            className="bg-violet-300/80 hover:bg-violet-300 text-slate-900 px-3 py-1 rounded-lg text-sm font-semibold border border-white/40 backdrop-blur-md transition-all duration-200 hover:shadow-violet-300/40 active:scale-[0.98]"
                           >
                             New Version
                           </button>
                           <button
                             onClick={() => handleSignContract(contract.id)}
-                            className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-sm"
+                            className="bg-emerald-300/80 hover:bg-emerald-300 text-slate-900 px-3 py-1 rounded-lg text-sm font-semibold border border-white/40 backdrop-blur-md transition-all duration-200 hover:shadow-emerald-300/40 active:scale-[0.98]"
                           >
                             Sign
                           </button>
@@ -368,14 +368,14 @@ export default function ContractsPage() {
                       {contract?.is_signed && !contract?.is_revoked && (
                         <button
                           onClick={() => handleRevokeContract(contract.id)}
-                          className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm"
+                          className="bg-rose-300/80 hover:bg-rose-300 text-slate-900 px-3 py-1 rounded-lg text-sm font-semibold border border-white/40 backdrop-blur-md transition-all duration-200 hover:shadow-rose-300/40 active:scale-[0.98]"
                         >
                           Revoke
                         </button>
                       )}
                       <Link
                         href={`/admin/contracts/${contract.id}`}
-                        className="bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded text-sm"
+                        className="bg-white/70 hover:bg-white text-slate-900 px-3 py-1 rounded-lg text-sm font-semibold border border-white/50 backdrop-blur-md transition-all duration-200 hover:shadow active:scale-[0.98]"
                       >
                         Details
                       </Link>
