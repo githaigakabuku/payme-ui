@@ -4,7 +4,15 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth";
 import { useRouter } from "next/navigation";
 import api from "@/lib/api";
-import Link from "next/link";
+import SidebarLayout from "@/app/components/SidebarLayout";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { useForm } from "react-hook-form";
+import { Plus, Users, Building2, Mail, Phone } from "lucide-react";
 
 interface Client {
   id: string;
@@ -20,19 +28,22 @@ interface Client {
 }
 
 export default function ClientsPage() {
-  const { user, isLoading } = useAuth();
+  const { user, logout, isLoading } = useAuth();
   const router = useRouter();
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showForm, setShowForm] = useState(false);
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    company: "",
-    contact_person: "",
-    phone: "",
-    address: "",
-    tax_id: "",
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  const form = useForm({
+    defaultValues: {
+      name: "",
+      email: "",
+      company: "",
+      contact_person: "",
+      phone: "",
+      address: "",
+      tax_id: "",
+    },
   });
 
   useEffect(() => {
@@ -50,31 +61,21 @@ export default function ClientsPage() {
   const fetchClients = async () => {
     try {
       const response = await api.getClients();
-      // Accommodate for null values and different response structures
       const clientList = response?.results ?? response ?? [];
       setClients(Array.isArray(clientList) ? clientList : []);
     } catch (error) {
       console.error("Failed to fetch clients:", error);
-      setClients([]); // Ensure clients is always an array
+      setClients([]);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSubmit = async (data: any) => {
     try {
-      await api.createClient(formData);
-      setFormData({
-        name: "",
-        email: "",
-        company: "",
-        contact_person: "",
-        phone: "",
-        address: "",
-        tax_id: "",
-      });
-      setShowForm(false);
+      await api.createClient(data);
+      setIsDialogOpen(false);
+      form.reset();
       fetchClients();
     } catch (error) {
       console.error("Failed to create client:", error);
@@ -83,207 +84,195 @@ export default function ClientsPage() {
 
   if (isLoading || loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-indigo-600"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
-        </div>
+      <div className="min-h-screen bg-mesh flex items-center justify-center">
+        <div className="w-12 h-12 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
       </div>
     );
   }
 
-  if (!user) {
-    return null;
-  }
+  if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex">
-              <div className="flex-shrink-0 flex items-center">
-                <h1 className="text-xl font-bold text-gray-900">PayMe Admin</h1>
-              </div>
-              <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
-                <a
-                  href="/admin"
-                  className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
-                >
-                  Dashboard
-                </a>
-                <a
-                  href="/admin/clients"
-                  className="border-indigo-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
-                >
-                  Clients
-                </a>
-                <Link
-                  href="/admin/contracts"
-                  className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
-                >
-                  Contracts
-                </Link>
-                <a
-                  href="/admin/payments"
-                  className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
-                >
-                  Payments
-                </a>
-              </div>
-            </div>
-            <div className="flex items-center">
-              <span className="text-gray-700 mr-4">Welcome, {user.username}</span>
-              <button
-                onClick={() => {
-                  localStorage.removeItem("access_token");
-                  localStorage.removeItem("refresh_token");
-                  router.push("/login");
-                }}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium"
-              >
-                Logout
-              </button>
-            </div>
+    <SidebarLayout user={user} logout={logout}>
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <h2 className="text-2xl font-bold text-foreground">Clients</h2>
+            <p className="text-muted-foreground mt-1">{clients.length} total clients</p>
           </div>
-        </div>
-      </nav>
-
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 py-6 sm:px-0">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">Clients</h2>
-            <button
-              onClick={() => setShowForm(true)}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium"
-            >
-              Add New Client
-            </button>
-          </div>
-
-          {showForm && (
-            <div className="bg-white shadow rounded-lg p-6 mb-6">
-              <h3 className="text-lg font-medium text-black mb-4">Add New Client</h3>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-black">Name</label>
-                    <input
-                      type="text"
-                      required
-                      className="mt-1 block w-full py-3 px-4 border-black rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-base text-black"
-                      value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button className="rounded-xl bg-primary hover:bg-primary/90 glow-purple-sm">
+                <Plus className="mr-2 h-4 w-4" />
+                Add Client
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="glass border-border/50 text-foreground max-w-2xl">
+              <DialogHeader>
+                <DialogTitle className="text-foreground">Add New Client</DialogTitle>
+              </DialogHeader>
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-foreground/80">Name</FormLabel>
+                          <FormControl>
+                            <Input className="glass-input rounded-xl" placeholder="Client name" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-foreground/80">Email</FormLabel>
+                          <FormControl>
+                            <Input type="email" className="glass-input rounded-xl" placeholder="client@email.com" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="company"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-foreground/80">Company</FormLabel>
+                          <FormControl>
+                            <Input className="glass-input rounded-xl" placeholder="Company name" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="contact_person"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-foreground/80">Contact Person</FormLabel>
+                          <FormControl>
+                            <Input className="glass-input rounded-xl" placeholder="Contact person" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="phone"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-foreground/80">Phone</FormLabel>
+                          <FormControl>
+                            <Input type="tel" className="glass-input rounded-xl" placeholder="+1 (555) 000-0000" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="tax_id"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-foreground/80">Tax ID</FormLabel>
+                          <FormControl>
+                            <Input className="glass-input rounded-xl" placeholder="Tax ID" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
                     />
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-green-700">Email</label>
-                    <input
-                      type="email"
-                      required
-                      className="mt-1 block w-full py-3 px-4 border-green-500 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-base text-black"
-                      value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-black">Company</label>
-                    <input
-                      type="text"
-                      required
-                      className="mt-1 block w-full py-3 px-4 border-black rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-base text-black"
-                      value={formData.company}
-                      onChange={(e) => setFormData({ ...formData, company: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-black">Contact Person</label>
-                    <input
-                      type="text"
-                      required
-                      className="mt-1 block w-full py-3 px-4 border-black rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-base text-black"
-                      value={formData.contact_person}
-                      onChange={(e) => setFormData({ ...formData, contact_person: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-black">Phone</label>
-                    <input
-                      type="tel"
-                      className="mt-1 block w-full py-3 px-4 border-black rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-base text-black"
-                      value={formData.phone}
-                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-black">Tax ID</label>
-                    <input
-                      type="text"
-                      className="mt-2 block w-full py-3 px-4 border-black rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-base text-black"
-                      value={formData.tax_id}
-                      onChange={(e) => setFormData({ ...formData, tax_id: e.target.value })}
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-black">Address</label>
-                  <textarea
-                    rows={6}
-                    className="mt-1 block w-full py-3 px-4 border-black rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-base text-black"
-                    value={formData.address}
-                    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                  <FormField
+                    control={form.control}
+                    name="address"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-foreground/80">Address</FormLabel>
+                        <FormControl>
+                          <Textarea className="glass-input rounded-xl" placeholder="Full address" rows={3} {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
-                </div>
-                <div className="flex justify-end space-x-3">
-                  <button
-                    type="button"
-                    onClick={() => setShowForm(false)}
-                    className="bg-gray-300 hover:bg-gray-400 text-black px-4 py-2 rounded-md text-sm font-medium"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium"
-                  >
-                    Create Client
-                  </button>
-                </div>
-              </form>
-            </div>
-          )}
-
-          <div className="bg-white shadow overflow-hidden sm:rounded-md">
-            <ul className="divide-y divide-gray-200">
-              {clients.length === 0 ? (
-                <li className="px-6 py-4 text-center text-gray-500">
-                  No clients found. Add your first client above.
-                </li>
-              ) : (
-                clients.map((client) => (
-                  <li key={client.id} className="px-6 py-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="text-sm font-medium text-gray-900">{client.name}</h3>
-                        <p className="text-sm text-gray-500">{client.company}</p>
-                        <p className="text-sm text-gray-500">{client.email}</p>
-                      </div>
-                      <div className="flex space-x-2">
-                        <button className="text-indigo-600 hover:text-indigo-900 text-sm font-medium">
-                          View
-                        </button>
-                        <button className="text-indigo-600 hover:text-indigo-900 text-sm font-medium">
-                          Edit
-                        </button>
-                      </div>
-                    </div>
-                  </li>
-                ))
-              )}
-            </ul>
-          </div>
+                  <div className="flex justify-end gap-3 pt-2">
+                    <Button type="button" variant="outline" className="rounded-xl border-border/50" onClick={() => setIsDialogOpen(false)}>
+                      Cancel
+                    </Button>
+                    <Button type="submit" className="rounded-xl bg-primary hover:bg-primary/90">
+                      Create Client
+                    </Button>
+                  </div>
+                </form>
+              </Form>
+            </DialogContent>
+          </Dialog>
         </div>
-      </main>
-    </div>
+
+        <div className="glass-card rounded-xl overflow-hidden">
+          {clients.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-16">
+              <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
+                <Users className="w-8 h-8 text-primary" />
+              </div>
+              <p className="text-foreground font-medium">No clients yet</p>
+              <p className="text-muted-foreground text-sm mt-1">Add your first client to get started</p>
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow className="border-border/30 hover:bg-transparent">
+                  <TableHead className="text-muted-foreground">Client</TableHead>
+                  <TableHead className="text-muted-foreground">Company</TableHead>
+                  <TableHead className="text-muted-foreground">Email</TableHead>
+                  <TableHead className="text-muted-foreground">Phone</TableHead>
+                  <TableHead className="text-muted-foreground">Status</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {clients.map((client) => (
+                  <TableRow key={client.id} className="border-border/20 hover:bg-accent/50">
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                          <span className="text-xs font-semibold text-primary">
+                            {client.name?.[0]?.toUpperCase() ?? "?"}
+                          </span>
+                        </div>
+                        <div>
+                          <p className="font-medium text-foreground">{client.name}</p>
+                          <p className="text-xs text-muted-foreground">{client.contact_person}</p>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-foreground/80">{client.company}</TableCell>
+                    <TableCell className="text-foreground/80">{client.email}</TableCell>
+                    <TableCell className="text-foreground/80">{client.phone || "—"}</TableCell>
+                    <TableCell>
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                        client.is_active ? "badge-success" : "badge-destructive"
+                      }`}>
+                        {client.is_active ? "Active" : "Inactive"}
+                      </span>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </div>
+      </div>
+    </SidebarLayout>
   );
 }

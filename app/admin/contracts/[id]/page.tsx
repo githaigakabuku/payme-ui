@@ -5,6 +5,11 @@ import { useAuth } from "@/lib/auth";
 import { useRouter, useParams } from "next/navigation";
 import api from "@/lib/api";
 import Link from "next/link";
+import SidebarLayout from "@/app/components/SidebarLayout";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { ArrowLeft, CheckCircle, XCircle, Clock, FileDown, FilePlus, Pen, Save, X } from "lucide-react";
 
 interface ContractVersion {
   id: string;
@@ -17,12 +22,7 @@ interface ContractVersion {
 
 interface Contract {
   id: string;
-  client: {
-    id: string;
-    name: string;
-    company: string;
-    email: string;
-  } | string | null;
+  client: { id: string; name: string; company: string; email: string; } | string | null;
   title: string;
   description: string;
   is_signed: boolean;
@@ -36,7 +36,7 @@ interface Contract {
 }
 
 export default function ContractDetailPage() {
-  const { user, isLoading } = useAuth();
+  const { user, logout, isLoading } = useAuth();
   const router = useRouter();
   const params = useParams();
   const contractId = params.id as string;
@@ -45,23 +45,13 @@ export default function ContractDetailPage() {
   const [loading, setLoading] = useState(true);
   const [selectedVersion, setSelectedVersion] = useState<ContractVersion | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [clientDetails, setClientDetails] = useState<{
-    id: string;
-    name: string;
-    company: string;
-    email: string;
-  } | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [clientDetails, setClientDetails] = useState<{ id: string; name: string; company: string; email: string; } | null>(null);
   const [isEditing, setIsEditing] = useState(false);
-  const [editForm, setEditForm] = useState({
-    title: "",
-    description: "",
-    content: "",
-  });
+  const [editForm, setEditForm] = useState({ title: "", description: "", content: "" });
 
   useEffect(() => {
-    if (!isLoading && !user) {
-      router.push("/login");
-    }
+    if (!isLoading && !user) router.push("/login");
   }, [user, isLoading, router]);
 
   const fetchContract = useCallback(async () => {
@@ -82,31 +72,27 @@ export default function ContractDetailPage() {
         } else {
           setClientDetails(data.client);
         }
-      } else {
-        setClientDetails(null);
       }
     } catch (error) {
       console.error("Failed to fetch contract:", error);
-      setError("Failed to load contract details. Please try again.");
-      setContract(null);
+      setError("Failed to load contract details.");
     } finally {
       setLoading(false);
     }
   }, [contractId]);
 
   useEffect(() => {
-    if (user && contractId) {
-      fetchContract();
-    }
+    if (user && contractId) fetchContract();
   }, [user, contractId, fetchContract]);
 
   const handleSignContract = async () => {
-    if (!confirm("Are you sure you want to sign this contract? This will make it immutable.")) return;
+    if (!confirm("Sign this contract? It will become immutable.")) return;
     try {
       await api.signContract(contractId);
+      setSuccess("Contract signed successfully!");
       fetchContract();
     } catch (error) {
-      console.error("Failed to sign contract:", error);
+      setError("Failed to sign contract.");
     }
   };
 
@@ -117,7 +103,7 @@ export default function ContractDetailPage() {
       await api.revokeContract(contractId, reason);
       fetchContract();
     } catch (error) {
-      console.error("Failed to revoke contract:", error);
+      setError("Failed to revoke contract.");
     }
   };
 
@@ -126,321 +112,205 @@ export default function ContractDetailPage() {
       await api.createContractVersion(contractId);
       fetchContract();
     } catch (error) {
-      console.error("Failed to create version:", error);
+      setError("Failed to create version.");
     }
   };
 
   const handleSaveDraft = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      setError(null);
-      await api.updateContract(contractId, {
-        title: editForm.title,
-        description: editForm.description,
-        content: editForm.content,
-      });
+      await api.updateContract(contractId, editForm);
       setIsEditing(false);
       fetchContract();
     } catch (error) {
-      console.error("Failed to update contract:", error);
-      setError("Failed to update draft. Please try again.");
+      setError("Failed to save draft.");
     }
   };
 
   if (isLoading || loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-indigo-600"></div>
+      <div className="min-h-screen bg-mesh flex items-center justify-center">
+        <div className="w-12 h-12 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
       </div>
     );
   }
 
   if (!user) return null;
 
-  if (error) {
+  if (error && !contract) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <nav className="bg-white shadow">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between h-16">
-              <div className="flex">
-                <div className="flex-shrink-0 flex items-center">
-                  <h1 className="text-xl font-bold text-gray-900">PayMe Admin</h1>
-                </div>
-              </div>
-            </div>
-          </div>
-        </nav>
-        <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-          <div className="px-4 py-6 sm:px-0">
-            <div className="bg-red-50 border border-red-200 rounded-md p-4">
-              <div className="flex">
-                <div className="flex-shrink-0">
-                  <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <div className="ml-3">
-                  <p className="text-sm text-red-800">{error}</p>
-                  <Link
-                    href="/admin/contracts"
-                    className="text-sm text-red-600 hover:text-red-500 mt-2 inline-block"
-                  >
-                    ← Back to Contracts
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </div>
+      <SidebarLayout user={user} logout={logout}>
+        <div className="space-y-4">
+          <Link href="/admin/contracts" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
+            <ArrowLeft className="w-4 h-4" /> Back to Contracts
+          </Link>
+          <div className="badge-destructive rounded-xl p-4">{error}</div>
         </div>
-      </div>
+      </SidebarLayout>
     );
   }
 
   if (!contract) return null;
 
+  const getStatus = () => {
+    if (contract.is_revoked) return { label: "Revoked", className: "badge-destructive", icon: XCircle };
+    if (contract.is_signed) return { label: "Signed", className: "badge-success", icon: CheckCircle };
+    return { label: "Draft", className: "badge-warning", icon: Clock };
+  };
+
+  const status = getStatus();
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-sky-950 via-blue-950 to-cyan-900">
-      <nav className="bg-white/80 backdrop-blur border-b border-white/20 shadow-lg">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex">
-              <div className="flex-shrink-0 flex items-center">
-                <h1 className="text-xl font-bold text-gray-900">PayMe Admin</h1>
+    <SidebarLayout user={user} logout={logout}>
+      <div className="space-y-6">
+        {/* Breadcrumb */}
+        <Link href="/admin/contracts" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
+          <ArrowLeft className="w-4 h-4" /> Back to Contracts
+        </Link>
+
+        {/* Alerts */}
+        {success && (
+          <div className="badge-success rounded-xl px-4 py-3 flex items-center justify-between">
+            <span className="text-sm">{success}</span>
+            <button onClick={() => setSuccess(null)} className="hover:opacity-80"><X className="w-4 h-4" /></button>
+          </div>
+        )}
+        {error && (
+          <div className="badge-destructive rounded-xl px-4 py-3 flex items-center justify-between">
+            <span className="text-sm">{error}</span>
+            <button onClick={() => setError(null)} className="hover:opacity-80"><X className="w-4 h-4" /></button>
+          </div>
+        )}
+
+        {/* Contract Header */}
+        <div className="glass-card rounded-xl p-6">
+          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+            <div className="space-y-2">
+              <div className="flex items-center gap-3">
+                <h2 className="text-2xl font-bold text-foreground">{contract.title || "Untitled"}</h2>
+                <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium ${status.className}`}>
+                  <status.icon className="w-3 h-3" />
+                  {status.label}
+                </span>
               </div>
-              <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
-                <Link
-                  href="/admin"
-                  className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
-                >
-                  Dashboard
-                </Link>
-                <Link
-                  href="/admin/clients"
-                  className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
-                >
-                  Clients
-                </Link>
-                <Link
-                  href="/admin/contracts"
-                  className="border-indigo-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
-                >
-                  Contracts
-                </Link>
-                <Link
-                  href="/admin/payments"
-                  className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
-                >
-                  Payments
-                </Link>
+              <p className="text-muted-foreground">{contract.description || "No description"}</p>
+              <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+                <span>Client: {clientDetails ? `${clientDetails.name} (${clientDetails.company})` : "Unknown"}</span>
+                <span>Created: {new Date(contract.created_at).toLocaleDateString()}</span>
+                {contract.signed_at && <span>Signed: {new Date(contract.signed_at).toLocaleDateString()}</span>}
               </div>
+              {contract.revocation_reason && (
+                <p className="text-sm text-destructive">Reason: {contract.revocation_reason}</p>
+              )}
             </div>
-            <div className="flex items-center">
-              <button
-                onClick={() => {
-                  localStorage.removeItem("access_token");
-                  localStorage.removeItem("refresh_token");
-                  router.push("/login");
-                }}
-                className="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium"
-              >
-                Logout
-              </button>
+            <div className="flex flex-wrap gap-2">
+              {contract.current_version?.pdf_url && (
+                <a href={`http://localhost:8000${contract.current_version.pdf_url}`} target="_blank" rel="noopener noreferrer">
+                  <Button variant="outline" className="rounded-xl border-border/50">
+                    <FileDown className="w-4 h-4 mr-2" /> PDF
+                  </Button>
+                </a>
+              )}
+              {!contract.is_signed && (
+                <>
+                  <Button variant="outline" className="rounded-xl border-border/50" onClick={handleCreateVersion}>
+                    <FilePlus className="w-4 h-4 mr-2" /> New Version
+                  </Button>
+                  <Button variant="outline" className="rounded-xl border-border/50" onClick={() => setIsEditing(!isEditing)}>
+                    <Pen className="w-4 h-4 mr-2" /> Edit
+                  </Button>
+                  <Button className="rounded-xl bg-success/90 hover:bg-success text-success-foreground" onClick={handleSignContract}>
+                    <CheckCircle className="w-4 h-4 mr-2" /> Sign
+                  </Button>
+                </>
+              )}
+              {contract.is_signed && !contract.is_revoked && (
+                <Button variant="destructive" className="rounded-xl" onClick={handleRevokeContract}>
+                  <XCircle className="w-4 h-4 mr-2" /> Revoke
+                </Button>
+              )}
             </div>
           </div>
         </div>
-      </nav>
 
-      <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 py-6 sm:px-0">
-          <div className="mb-6">
-            <Link
-              href="/admin/contracts"
-              className="text-indigo-600 hover:text-indigo-500 text-sm font-medium"
-            >
-              ← Back to Contracts
-            </Link>
+        {/* Edit Form */}
+        {isEditing && !contract.is_signed && (
+          <div className="glass-card rounded-xl p-6">
+            <h3 className="text-lg font-semibold text-foreground mb-4">Edit Draft</h3>
+            <form onSubmit={handleSaveDraft} className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground/80">Title</label>
+                <Input className="glass-input rounded-xl" value={editForm.title} onChange={(e) => setEditForm({ ...editForm, title: e.target.value })} required />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground/80">Description</label>
+                <Input className="glass-input rounded-xl" value={editForm.description} onChange={(e) => setEditForm({ ...editForm, description: e.target.value })} />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground/80">Content</label>
+                <Textarea className="glass-input rounded-xl" rows={10} value={editForm.content} onChange={(e) => setEditForm({ ...editForm, content: e.target.value })} required />
+              </div>
+              <div className="flex justify-end gap-3">
+                <Button type="button" variant="outline" className="rounded-xl border-border/50" onClick={() => setIsEditing(false)}>Cancel</Button>
+                <Button type="submit" className="rounded-xl bg-primary hover:bg-primary/90">
+                  <Save className="w-4 h-4 mr-2" /> Save Draft
+                </Button>
+              </div>
+            </form>
           </div>
+        )}
 
-          <div className="bg-white/10 backdrop-blur shadow-xl border border-white/30 rounded-2xl">
-            <div className="px-6 py-4 border-b border-black/10">
-              <div className="flex justify-between items-start">
-                <div>
-                  <h2 className="text-2xl font-bold text-black">{contract.title || "Untitled Contract"}</h2>
-                  <p className="text-black mt-1">{contract.description || 'No description available'}</p>
-                  <div className="mt-2 flex items-center space-x-4">
-                    <span className="text-sm text-black">
-                      Client: {clientDetails ? `${clientDetails.name} (${clientDetails.company})` : "Unknown Client"}
-                    </span>
-                    <span
-                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        contract.is_signed
-                          ? contract.is_revoked
-                            ? "bg-red-100 text-red-800"
-                            : "bg-green-100 text-green-800"
-                          : "bg-yellow-100 text-yellow-800"
+        {/* Content & Versions */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          {/* Versions sidebar */}
+          <div className="lg:col-span-1">
+            <div className="glass-card rounded-xl p-4">
+              <h3 className="text-sm font-semibold text-foreground mb-3">Versions</h3>
+              <div className="space-y-1.5">
+                {contract.versions?.length > 0 ? (
+                  contract.versions.map((version) => (
+                    <button
+                      key={version.id}
+                      onClick={() => setSelectedVersion(version)}
+                      className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all ${
+                        selectedVersion?.id === version.id
+                          ? "bg-primary/20 text-primary glow-purple-sm"
+                          : "text-muted-foreground hover:text-foreground hover:bg-accent"
                       }`}
                     >
-                      {contract.is_revoked ? "Revoked" : contract.is_signed ? "Signed" : "Draft"}
-                    </span>
-                  </div>
-                  <div className="mt-2 text-xs text-black">
-                    Created: {new Date(contract.created_at).toLocaleDateString()}
-                    {contract.signed_at && ` | Signed: ${new Date(contract.signed_at).toLocaleDateString()}`}
-                    {contract.is_revoked && contract.revoked_at && ` | Revoked: ${new Date(contract.revoked_at).toLocaleDateString()}`}
-                  </div>
-                  {contract.revocation_reason && (
-                    <p className="mt-2 text-sm text-red-600">
-                      Revocation Reason: {contract.revocation_reason}
-                    </p>
-                  )}
-                </div>
-                <div className="flex space-x-2">
-                  {contract.current_version?.pdf_url && (
-                    <a
-                      href={`http://localhost:8000${contract.current_version.pdf_url}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="bg-sky-400/80 hover:bg-sky-400 text-slate-900 px-4 py-2 rounded-xl text-sm font-semibold border border-white/40 backdrop-blur-md transition-all duration-200 hover:shadow-sky-300/40 active:scale-[0.98]"
-                    >
-                      View PDF
-                    </a>
-                  )}
-                  {!contract.is_signed && (
-                    <>
-                      <button
-                        onClick={handleCreateVersion}
-                        className="bg-violet-300/80 hover:bg-violet-300 text-slate-900 px-4 py-2 rounded-xl text-sm font-semibold border border-white/40 backdrop-blur-md transition-all duration-200 hover:shadow-violet-300/40 active:scale-[0.98]"
-                      >
-                        New Version
-                      </button>
-                      <button
-                        onClick={() => setIsEditing(true)}
-                        className="bg-sky-400/80 hover:bg-sky-400 text-slate-900 px-4 py-2 rounded-xl text-sm font-semibold border border-white/40 backdrop-blur-md transition-all duration-200 hover:shadow-sky-300/40 active:scale-[0.98]"
-                      >
-                        Edit Draft
-                      </button>
-                      <button
-                        onClick={handleSignContract}
-                        className="bg-emerald-300/80 hover:bg-emerald-300 text-black-900 px-4 py-2 rounded-xl text-sm font-semibold border border-white/40 backdrop-blur-md transition-all duration-200 hover:shadow-emerald-300/40 active:scale-[0.98]"
-                      >
-                        Sign Contract
-                      </button>
-                    </>
-                  )}
-                  {contract.is_signed && !contract.is_revoked && (
-                    <button
-                      onClick={handleRevokeContract}
-                      className="bg-rose-300/80 hover:bg-rose-300 text-slate-900 px-4 py-2 rounded-xl text-sm font-semibold border border-white/40 backdrop-blur-md transition-all duration-200 hover:shadow-rose-300/40 active:scale-[0.98]"
-                    >
-                      Revoke Contract
+                      <div className="font-medium">Version {version.version_number}</div>
+                      <div className="text-xs opacity-70">
+                        {new Date(version.created_at).toLocaleDateString()}
+                        {version.is_current && " (Current)"}
+                      </div>
                     </button>
-                  )}
-                </div>
+                  ))
+                ) : (
+                  <p className="text-xs text-muted-foreground">No versions</p>
+                )}
               </div>
             </div>
-                      {/*these is the edit draft contract page  */}
-            <div className="px-6 py-4">
-              {isEditing && !contract.is_signed && (
-                <div className="mb-6 bg-white/90 backdrop-blur rounded-2xl border border-white/40 p-6 shadow-lg">
-                  <h3 className="text-lg font-medium text-black mb-4">Edit Draft</h3>
-                  <form onSubmit={handleSaveDraft} className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-black">Title</label>
-                      <input
-                        type="text"
-                        value={editForm.title}
-                        onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
-                        className="mt-1 block w-full border-sky-200/80 rounded-xl shadow-sm focus:ring-sky-400 focus:border-sky-400 bg-white/80 text-black backdrop-blur"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-black">Description</label>
-                      <input
-                        type="text"
-                        value={editForm.description}
-                        onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
-                        className="mt-1 block w-full border-sky-200/80 rounded-xl shadow-sm focus:ring-sky-400 focus:border-sky-400 bg-orange-100 text-green-900 backdrop-blur"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-black">Content</label>
-                      <textarea
-                        value={editForm.content}
-                        onChange={(e) => setEditForm({ ...editForm, content: e.target.value })}
-                        rows={10}
-                        className="mt-1 block w-full border-sky-200/80 rounded-xl shadow-sm focus:ring-sky-400 focus:border-sky-400 bg-white text-green-900 backdrop-blur"
-                        required
-                      />
-                    </div>
-                    <div className="flex justify-end space-x-3">
-                      <button
-                        type="button"
-                        onClick={() => setIsEditing(false)}
-                        className="bg-white/70 hover:bg-white text-slate-800 px-4 py-2 rounded-xl text-sm font-semibold border border-white/50 backdrop-blur-md transition-all duration-200 hover:shadow"
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        type="submit"
-                        className="bg-sky-400/80 hover:bg-sky-400 text-slate-900 px-4 py-2 rounded-xl text-sm font-semibold border border-white/40 backdrop-blur-md transition-all duration-200 hover:shadow-sky-300/40 active:scale-[0.98]"
-                      >
-                        Save Draft
-                      </button>
-                    </div>
-                  </form>
+          </div>
+
+          {/* Content viewer */}
+          <div className="lg:col-span-3">
+            <div className="glass-card rounded-xl p-6">
+              <h3 className="text-sm font-semibold text-foreground mb-3">Contract Content</h3>
+              {selectedVersion ? (
+                <div className="glass-light rounded-xl p-6">
+                  <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed text-foreground/90">
+                    {selectedVersion.content}
+                  </pre>
+                </div>
+              ) : (
+                <div className="glass-light rounded-xl p-6 text-center text-muted-foreground">
+                  Select a version to view content
                 </div>
               )}
-              <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-                <div className="lg:col-span-1">
-                  <h3 className="text-lg font-medium text-black mb-4">Versions</h3>
-                  <div className="space-y-2">
-                    {contract.versions && contract.versions.length > 0 ? (
-                      contract.versions.map((version) => (
-                        <button
-                          key={version.id}
-                          onClick={() => setSelectedVersion(version)}
-                          className={`w-full text-left px-3 py-2 rounded-md text-sm ${
-                            selectedVersion?.id === version.id
-                              ? "bg-indigo-100 text-indigo-900 border border-indigo-300"
-                              : "bg-gray-50 text-gray-700 hover:bg-gray-100"
-                          }`}
-                        >
-                          <div className="font-medium">Version {version.version_number}</div>
-                          <div className="text-xs text-black">
-                            {new Date(version.created_at).toLocaleDateString()}
-                            {version.is_current && " (Current)"}
-                          </div>
-                        </button>
-                      ))
-                    ) : (
-                      <div className="text-sm text-black">No versions available</div>
-                    )}
-                  </div>
-                </div>
-
-                <div className="lg:col-span-3">
-                  <h3 className="text-lg font-medium text-black mb-4">Contract Content</h3>
-                  {selectedVersion ? (
-                    <div className="bg-black-50 rounded-lg p-6">
-                      <div className="prose max-w-none">
-                        <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed">
-                          {selectedVersion.content}
-                        </pre>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="bg-gray-50 rounded-lg p-6 text-center text-black">
-                      Select a version to view content
-                    </div>
-                  )}
-                </div>
-              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </SidebarLayout>
   );
 }
