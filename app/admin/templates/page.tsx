@@ -13,11 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useForm } from "react-hook-form";
-import dynamic from "next/dynamic";
 import { Plus, File } from "lucide-react";
-
-const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
-import "react-quill/dist/quill.snow.css";
 
 interface Template {
   id: string;
@@ -147,7 +143,7 @@ export default function AdminTemplates() {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="">No specific tier</SelectItem>
+                            <SelectItem value="none">No specific tier</SelectItem>
                             {tiers.map((tier) => (
                               <SelectItem key={tier.id} value={tier.id}>
                                 {tier.name}
@@ -179,10 +175,10 @@ export default function AdminTemplates() {
                       <FormItem>
                         <FormLabel>Content</FormLabel>
                         <FormControl>
-                          <ReactQuill
-                            theme="snow"
-                            value={field.value}
-                            onChange={field.onChange}
+                          <Textarea
+                            placeholder="Enter contract template content..."
+                            className="min-h-[300px] font-mono text-sm"
+                            {...field}
                           />
                         </FormControl>
                         <FormMessage />

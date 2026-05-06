@@ -209,7 +209,7 @@ export default function AdminInvoices() {
             <TableBody>
               {invoices.map((invoice) => (
                 <TableRow key={invoice.id}>
-                  <TableCell className="font-medium">{invoice.invoice_number}</TableCell>
+                  <TableCell className="font-medium">{invoice.title}</TableCell>
                   <TableCell>${invoice.amount}</TableCell>
                   <TableCell>{invoice.status}</TableCell>
                   <TableCell>{new Date(invoice.due_date).toLocaleDateString()}</TableCell>
