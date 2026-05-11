@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/lib/auth";
 import { useRouter, useParams } from "next/navigation";
-import api from "@/lib/api";
+import api, { BACKEND_ORIGIN } from "@/lib/api";
 import Link from "next/link";
 import SidebarLayout from "@/app/components/SidebarLayout";
 import { Button } from "@/components/ui/button";
@@ -205,7 +205,7 @@ export default function ContractDetailPage() {
             </div>
             <div className="flex flex-wrap gap-2">
               {contract.current_version?.pdf_url && (
-                <a href={`http://localhost:8000${contract.current_version.pdf_url}`} target="_blank" rel="noopener noreferrer">
+                <a href={`${BACKEND_ORIGIN}${contract.current_version.pdf_url}`} target="_blank" rel="noopener noreferrer">
                   <Button variant="outline" className="rounded-xl border-border/50">
                     <FileDown className="w-4 h-4 mr-2" /> PDF
                   </Button>

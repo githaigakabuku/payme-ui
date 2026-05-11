@@ -1,7 +1,10 @@
+export const BACKEND_ORIGIN = process.env.NEXT_PUBLIC_BACKEND_URL ?? "https://clientpayment.onrender.com";
+export const API_BASE_URL = `${BACKEND_ORIGIN}/api`;
+
 class ApiClient {
   baseURL: string;
 
-  constructor(baseURL = "http://localhost:8000/api") {
+  constructor(baseURL = API_BASE_URL) {
     this.baseURL = baseURL;
   }
 

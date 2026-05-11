@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth";
 import { useRouter } from "next/navigation";
-import api from "@/lib/api";
+import api, { BACKEND_ORIGIN } from "@/lib/api";
 import Link from "next/link";
 import SidebarLayout from "@/app/components/SidebarLayout";
 import { Button } from "@/components/ui/button";
@@ -346,7 +346,7 @@ export default function ContractsPage() {
                         <div className="flex items-center justify-end gap-1.5">
                           {contract.current_version?.pdf_url && (
                             <a
-                              href={`http://localhost:8000${contract.current_version.pdf_url}`}
+                              href={`${BACKEND_ORIGIN}${contract.current_version.pdf_url}`}
                               target="_blank"
                               rel="noopener noreferrer"
                             >
