@@ -1,69 +1,909 @@
-<!DOCTYPE>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PaymeUI page mockups</title>
-    <link rel="stylesheet" href="styles.css">
-  </head>
-  <body>
-    <h1>PAYMEUI PAGE MOCKUPS</h1>
-    <p>This documentation presents a high-level visual touring of the PayMe platform.a visual walkthrough of our Next.js & Django-powered platform. Explore the user flows, subscription tier management, and real-time dashboard interfaces designed to streamline digital payments.</p>
-    <section>
-      <div>
-        <h3>Sign In Page</h3>
-        <img  alt="signinpage">
-        <p></p>
-      </div>  
-    </section>
-    <section>
-      <div>
-        <h3>Dashboard Page</h3>
-        <img alt="dashboard">
-        <p></p>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PayMe — Subscription &amp; Invoice Management Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0a0712;
+    --bg-alt: #0d0a18;
+    --surface: #150f22;
+    --surface-2: #1c1530;
+    --border: rgba(148,105,255,0.16);
+    --border-strong: rgba(148,105,255,0.32);
+    --violet: #7c3aed;
+    --violet-light: #a78bfa;
+    --violet-soft: #8b5cf6;
+    --magenta: #d946ef;
+    --text: #f3eefc;
+    --text-muted: #a99cc9;
+    --text-dim: #6d6089;
+    --success: #34d399;
+    --radius: 18px;
+  }
+
+  *{ box-sizing: border-box; }
+  html{ scroll-behavior: smooth; }
+
+  body{
+    margin:0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  body::before{
+    content:"";
+    position: fixed;
+    inset:0;
+    z-index: -2;
+    background:
+      radial-gradient(60% 45% at 15% -5%, rgba(124,58,237,0.22), transparent 60%),
+      radial-gradient(50% 40% at 100% 10%, rgba(217,70,239,0.14), transparent 60%),
+      radial-gradient(70% 60% at 50% 100%, rgba(124,58,237,0.10), transparent 60%),
+      var(--bg);
+  }
+
+  h1,h2,h3{
+    font-family: 'Space Grotesk', sans-serif;
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
+
+  .mono{
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  a{ color: var(--violet-light); }
+
+  img{ max-width: 100%; display:block; }
+
+  .wrap{
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 32px;
+  }
+
+  /* ---------- NAV ---------- */
+  .topnav{
+    position: sticky;
+    top:0;
+    z-index: 50;
+    backdrop-filter: blur(14px);
+    background: rgba(10,7,18,0.72);
+    border-bottom: 1px solid var(--border);
+  }
+  .topnav .wrap{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding-top:16px;
+    padding-bottom:16px;
+  }
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:700;
+    font-size:1.05rem;
+  }
+  .brand .mark{
+    width:28px; height:28px;
+    border-radius:9px;
+    background: linear-gradient(135deg, var(--violet), var(--magenta));
+    display:flex; align-items:center; justify-content:center;
+    box-shadow: 0 0 22px rgba(139,92,246,0.55);
+    font-size: 14px;
+  }
+  .brand span.accent{ color: var(--violet-light); }
+  .navlinks{
+    display:flex; gap:26px;
+    font-size:0.82rem;
+    color: var(--text-dim);
+  }
+  .navlinks a{
+    color: var(--text-dim);
+    text-decoration:none;
+    font-family:'JetBrains Mono', monospace;
+    letter-spacing: 0.02em;
+    transition: color .2s ease;
+  }
+  .navlinks a:hover{ color: var(--violet-light); }
+
+  /* ---------- HERO ---------- */
+  .hero{
+    padding: 110px 0 90px;
+    position: relative;
+  }
+  .hero-eyebrow{
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
+    font-family:'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--violet-light);
+    padding: 6px 14px;
+    border: 1px solid var(--border-strong);
+    border-radius: 100px;
+    background: rgba(124,58,237,0.08);
+  }
+  .hero-eyebrow .dot{
+    width:6px; height:6px; border-radius:50%;
+    background: var(--success);
+    box-shadow: 0 0 8px var(--success);
+  }
+  .hero h1{
+    font-size: clamp(2.6rem, 6vw, 4.6rem);
+    font-weight: 700;
+    margin-top: 26px;
+    max-width: 15ch;
+    line-height: 1.04;
+  }
+  .hero h1 .grad{
+    background: linear-gradient(100deg, var(--violet-light), var(--magenta) 60%, #f0abfc);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .hero p.lead{
+    margin-top: 26px;
+    max-width: 62ch;
+    font-size: 1.12rem;
+    color: var(--text-muted);
+  }
+  .hero-stats{
+    margin-top: 54px;
+    display:grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow:hidden;
+  }
+  .hero-stats div{
+    background: var(--surface);
+    padding: 22px 20px;
+  }
+  .hero-stats .num{
+    font-family:'Space Grotesk', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--violet-light);
+  }
+  .hero-stats .label{
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    margin-top: 4px;
+    font-family:'JetBrains Mono', monospace;
+  }
+
+  /* ---------- PERFORATION DIVIDER (signature element) ---------- */
+  .tear{
+    position: relative;
+    height: 46px;
+    margin: 0 auto;
+    max-width: 1180px;
+  }
+  .tear::before{
+    content:"";
+    position:absolute;
+    top:50%; left:32px; right:32px;
+    border-top: 2px dashed var(--border-strong);
+  }
+  .tear::after{
+    content:"";
+    position:absolute;
+    top:50%; left:32px;
+    width:14px; height:14px;
+    background: var(--bg);
+    border-radius:50%;
+    transform: translateY(-50%);
+    box-shadow:
+      1160px 0 0 0 var(--bg);
+    border: 1px solid var(--border);
+  }
+  .tear .stub{
+    position:absolute;
+    left:50%; top:50%;
+    transform: translate(-50%,-50%);
+    background: var(--bg);
+    padding: 0 14px;
+    font-family:'JetBrains Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--text-dim);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  /* ---------- SECTION ---------- */
+  section.page{
+    padding: 70px 0;
+    scroll-margin-top: 90px;
+  }
+  .section-head{
+    display:flex;
+    align-items: baseline;
+    gap: 18px;
+    flex-wrap: wrap;
+    margin-bottom: 42px;
+  }
+  .index-code{
+    font-family:'JetBrains Mono', monospace;
+    font-size: 0.95rem;
+    color: var(--violet-light);
+    border: 1px solid var(--border-strong);
+    padding: 4px 11px;
+    border-radius: 8px;
+    background: rgba(124,58,237,0.08);
+  }
+  .eyebrow-text{
+    font-family:'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+  .section-head h2{
+    width: 100%;
+    font-size: clamp(1.7rem, 3.4vw, 2.5rem);
+    font-weight: 700;
+    margin-top: 6px;
+  }
+
+  .grid-2{
+    display:grid;
+    grid-template-columns: 1.05fr 0.95fr;
+    gap: 56px;
+    align-items: start;
+  }
+  .grid-2.reverse{
+    grid-template-columns: 0.95fr 1.05fr;
+  }
+  .grid-2.reverse .frame{ order: 2; }
+  .grid-2.reverse .copy{ order: 1; }
+
+  /* screenshot frame */
+  .frame{
+    position: relative;
+    border-radius: 16px;
+    padding: 10px;
+    background: linear-gradient(160deg, rgba(124,58,237,0.35), rgba(217,70,239,0.12) 60%, transparent);
+  }
+  .frame-inner{
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border-strong);
+    background: #060409;
+    box-shadow: 0 30px 70px -25px rgba(76,29,149,0.65);
+  }
+  .frame-bar{
+    display:flex;
+    align-items:center;
+    gap:7px;
+    padding: 10px 14px;
+    background: #0c0815;
+    border-bottom: 1px solid var(--border);
+  }
+  .frame-bar i{
+    width:9px; height:9px; border-radius:50%;
+    background: #3a3350;
+  }
+  .frame-bar i:nth-child(1){ background:#f87171aa; }
+  .frame-bar i:nth-child(2){ background:#fbbf24aa; }
+  .frame-bar i:nth-child(3){ background:#34d399aa; }
+  .frame-bar .path{
+    margin-left: 10px;
+    font-family:'JetBrains Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--text-dim);
+  }
+  .frame img{ width: 100%; }
+
+  .copy .tag{
+    font-family:'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    display:block;
+    margin-bottom: 10px;
+  }
+  .copy h3.sub-title{
+    font-size: 1.3rem;
+    margin-bottom: 14px;
+  }
+  .copy p{
+    color: var(--text-muted);
+    font-size: 0.99rem;
+    margin: 0 0 16px;
+  }
+  .copy p strong{ color: var(--text); font-weight: 600; }
+  .copy .pitch{
+    border-left: 2px solid var(--violet);
+    padding-left: 16px;
+    color: #d9cffb;
+    font-style: normal;
+  }
+
+  .chip-row{
+    display:flex; flex-wrap:wrap; gap:8px;
+    margin-top: 18px;
+  }
+  .chip{
+    font-family:'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--violet-light);
+    border: 1px solid var(--border-strong);
+    padding: 5px 10px;
+    border-radius: 100px;
+    background: rgba(124,58,237,0.07);
+  }
+
+  /* sub-form block */
+  .subform{
+    margin-top: 60px;
+    padding-top: 44px;
+    border-top: 1px dashed var(--border);
+  }
+  .subform .section-head{
+    margin-bottom: 30px;
+  }
+  .subform .index-code{
+    font-size: 0.78rem;
+    padding: 3px 9px;
+  }
+  .subform h3{
+    font-size: clamp(1.25rem, 2.4vw, 1.6rem);
+    font-weight: 600;
+    margin-top: 4px;
+  }
+  .subform .grid-2{ gap: 44px; }
+  .subform .frame{ padding: 8px; }
+
+  .duo{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  /* ---------- STACK / RESOURCES SECTION ---------- */
+  .stack-grid{
+    display:grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+    margin-top: 40px;
+  }
+  .stack-card{
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 26px 22px;
+    transition: border-color .2s ease, transform .2s ease;
+  }
+  .stack-card:hover{
+    border-color: var(--border-strong);
+    transform: translateY(-3px);
+  }
+  .stack-card .icon{
+    width: 38px; height:38px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--violet), var(--magenta));
+    margin-bottom: 16px;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+  .stack-card h4{
+    font-family:'Space Grotesk', sans-serif;
+    font-size: 1rem;
+    margin: 0 0 10px;
+  }
+  .stack-card ul{
+    margin:0; padding-left: 18px;
+    color: var(--text-muted);
+    font-size: 0.86rem;
+  }
+  .stack-card li{ margin-bottom: 5px; }
+
+  /* ---------- VISION / FOOTER ---------- */
+  .vision{
+    padding: 100px 0 60px;
+    text-align: center;
+  }
+  .vision .eyebrow-text{ display:block; margin-bottom: 18px; }
+  .vision h2{
+    font-size: clamp(1.9rem, 4vw, 2.8rem);
+    max-width: 20ch;
+    margin: 0 auto;
+    line-height: 1.15;
+  }
+  .vision h2 .grad{
+    background: linear-gradient(100deg, var(--violet-light), var(--magenta));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .vision p{
+    max-width: 62ch;
+    margin: 26px auto 0;
+    color: var(--text-muted);
+  }
+  .future-tags{
+    display:flex; flex-wrap:wrap; justify-content:center;
+    gap: 10px; margin-top: 34px;
+  }
+
+  footer{
+    border-top: 1px solid var(--border);
+    padding: 34px 0;
+    text-align:center;
+    color: var(--text-dim);
+    font-family:'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+  }
+
+  /* ---------- reveal animation ---------- */
+  .reveal{
+    opacity: 0;
+    transform: translateY(22px);
+    transition: opacity .7s ease, transform .7s ease;
+  }
+  .reveal.in{
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .reveal{ opacity:1; transform:none; transition:none; }
+    html{ scroll-behavior:auto; }
+  }
+
+  @media (max-width: 900px){
+    .grid-2, .grid-2.reverse{
+      grid-template-columns: 1fr;
+    }
+    .grid-2.reverse .frame, .grid-2.reverse .copy{ order: initial; }
+    .hero-stats{ grid-template-columns: repeat(2,1fr); }
+    .stack-grid{ grid-template-columns: repeat(2,1fr); }
+    .duo{ grid-template-columns: 1fr; }
+    .navlinks{ display:none; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="wrap">
+    <div class="brand"><span class="mark">✦</span>Pay<span class="accent">Me</span></div>
+    <div class="navlinks">
+      <a href="#signin">Sign In</a>
+      <a href="#dashboard">Dashboard</a>
+      <a href="#clients">Clients</a>
+      <a href="#contracts">Contracts</a>
+      <a href="#tiers">Tiers</a>
+      <a href="#invoices">Invoices</a>
+      <a href="#templates">Templates</a>
+      <a href="#stack">Stack</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ============ HERO ============ -->
+<header class="hero">
+  <div class="wrap reveal in">
+    <span class="hero-eyebrow"><span class="dot"></span>PM-00 · Product Walkthrough</span>
+    <h1>Billing infrastructure for the <span class="grad">subscription economy.</span></h1>
+    <p class="lead">The global economy is shifting to recurring revenue — SaaS, freelancers, agencies, educators, consultants, AI startups. PayMe is the contract and payment management layer that lets them bill without building billing: clients, contracts, tiered pricing, invoices, and reusable templates in one modular, secure platform.</p>
+    <div class="hero-stats">
+      <div><div class="num">7</div><div class="label">Core Modules</div></div>
+      <div><div class="num">Django</div><div class="label">+ DRF · PostgreSQL</div></div>
+      <div><div class="num">Stripe</div><div class="label">Payments + Webhooks</div></div>
+      <div><div class="num">JWT</div><div class="label">Auth · RBAC · Audit</div></div>
+    </div>
+  </div>
+</header>
+
+<div class="tear"><span class="stub">// walkthrough begins</span></div>
+
+<!-- ============ SIGN IN ============ -->
+<section class="page" id="signin">
+  <div class="wrap reveal">
+    <div class="section-head">
+      <span class="index-code">PM-00</span>
+      <span class="eyebrow-text">Access · Authentication</span>
+      <h2>Sign In Page</h2>
+    </div>
+    <div class="grid-2">
+      <div class="frame">
+        <div class="frame-inner">
+          <div class="frame-bar"><i></i><i></i><i></i><span class="path">payme.app / login</span></div>
+          <img src="page-mockups/log-in-page.png" alt="PayMe sign in page">
+        </div>
       </div>
-    </section>
-    <section>
-      <div>
-        <h3></h3>
-        <img>
-        <p></p>
-      </div>  
-    </section>
-    <section>
-      <div>
-        <h3></h3>
-        <img>
-        <p></p>
-      </div>  
-    </section>
-    <section>
-      <div>
-        <h3></h3>
-        <img>
-        <p></p>
-      </div>  
-    </section>
-    <section>
-      <div>
-        <h3></h3>
-        <img>
-        <p></p>
-      </div>  
-    </section>
-    <section>
-      <div>
-        <h3></h3>
-        <img>
-        <p></p>
-      </div>  
-    </section>
-    <section>
-      <div>
-        <h3></h3>
-        <img>
-        <p></p>
-      </div>  
-    </section>
-  </body>
+      <div class="copy">
+        <span class="tag">What's on this screen</span>
+        <p>A centered login card on a deep violet gradient backdrop, carrying the PayMe wordmark and its tagline, <strong>"Contract &amp; Payment Management."</strong> Underneath, a simple username and password form leads with a full-width <strong>Sign in</strong> button, and the footer quietly reinforces the promise: <strong>secure contract management.</strong></p>
+        <p class="pitch">Every subscription business runs on trust before it runs on revenue. This is the front door to that trust — built on JWT authentication, role-based access control, and audit logging, so the businesses using PayMe can hand out access with confidence instead of duct tape.</p>
+        <div class="chip-row">
+          <span class="chip">JWT Auth</span>
+          <span class="chip">Role-Based Access</span>
+          <span class="chip">Audit Logging</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="tear"><span class="stub">PM-01</span></div>
+
+<!-- ============ DASHBOARD ============ -->
+<section class="page" id="dashboard">
+  <div class="wrap reveal">
+    <div class="section-head">
+      <span class="index-code">PM-01</span>
+      <span class="eyebrow-text">Overview · Command Center</span>
+      <h2>Dashboard Page</h2>
+    </div>
+    <div class="grid-2 reverse">
+      <div class="frame">
+        <div class="frame-inner">
+          <div class="frame-bar"><i></i><i></i><i></i><span class="path">payme.app / dashboard</span></div>
+          <img src="page-mockups/dashboard-page.png" alt="PayMe dashboard page">
+        </div>
+      </div>
+      <div class="copy">
+        <span class="tag">What's on this screen</span>
+        <p>The moment an admin signs in, they land on four live counters — <strong>Clients, Contracts, Invoices, Templates</strong> — followed by a Quick Actions rail (add a client, create a contract, create an invoice, manage tiers) and a Recent Activity feed tracking subscription tiers, invoices, and audit entries.</p>
+        <p class="pitch">This is the platform's answer to a founder's hardest question — "is the business actually working?" Instead of stitching together spreadsheets and bank statements, they get one screen that monitors performance and points straight at the next action, turning revenue visibility into something you glance at rather than calculate.</p>
+        <div class="chip-row">
+          <span class="chip">Business Analytics</span>
+          <span class="chip">Quick Actions</span>
+          <span class="chip">Activity Feed</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="tear"><span class="stub">PM-02</span></div>
+
+<!-- ============ CLIENTS ============ -->
+<section class="page" id="clients">
+  <div class="wrap reveal">
+    <div class="section-head">
+      <span class="index-code">PM-02</span>
+      <span class="eyebrow-text">Customers · Relationship Records</span>
+      <h2>Clients Page</h2>
+    </div>
+    <div class="grid-2">
+      <div class="frame">
+        <div class="frame-inner">
+          <div class="frame-bar"><i></i><i></i><i></i><span class="path">payme.app / clients</span></div>
+          <img src="page-mockups/clients-page.png" alt="PayMe clients page">
+        </div>
+      </div>
+      <div class="copy">
+        <span class="tag">What's on this screen</span>
+        <p>A clean directory table listing every customer by <strong>Client, Company, Email, Phone,</strong> and <strong>Status</strong>, with an <strong>Add Client</strong> action sitting top-right and a running total of clients on record.</p>
+        <p class="pitch">Behind every recurring invoice is a real relationship, and PayMe treats the client record as the source of truth that contracts, invoices, and tiers all point back to — the foundation of customer lifecycle management for agencies, educators, consultants, and healthcare providers alike.</p>
+      </div>
+    </div>
+
+    <div class="subform">
+      <div class="section-head">
+        <span class="index-code">PM-02.1</span>
+        <span class="eyebrow-text">Form</span>
+        <h3>Add New Client Form</h3>
+      </div>
+      <div class="grid-2 reverse">
+        <div class="frame">
+          <div class="frame-inner">
+            <div class="frame-bar"><i></i><i></i><i></i><span class="path">modal · new-client</span></div>
+            <img src="page-mockups/add-client-form-page.png" alt="Add new client form">
+          </div>
+        </div>
+        <div class="copy">
+          <p>A focused modal captures everything a contract or invoice will later need: <strong>Name, Email, Company, Contact Person, Phone, Tax ID,</strong> and a full <strong>Address</strong> field, then commits it with a single <strong>Create Client</strong> action.</p>
+          <p class="pitch">Onboarding a client here takes seconds, not a spreadsheet template — exactly the kind of common billing groundwork PayMe exists to absorb so founders can spend that time on their product instead.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="tear"><span class="stub">PM-03</span></div>
+
+<!-- ============ CONTRACTS ============ -->
+<section class="page" id="contracts">
+  <div class="wrap reveal">
+    <div class="section-head">
+      <span class="index-code">PM-03</span>
+      <span class="eyebrow-text">Agreements · Legal Trail</span>
+      <h2>Contracts Page</h2>
+    </div>
+    <div class="grid-2">
+      <div class="frame">
+        <div class="frame-inner">
+          <div class="frame-bar"><i></i><i></i><i></i><span class="path">payme.app / contracts</span></div>
+          <img src="page-mockups/contracts-page.png" alt="PayMe contracts page">
+        </div>
+      </div>
+      <div class="copy">
+        <span class="tag">What's on this screen</span>
+        <p>Every agreement lives here with its <strong>Contract</strong> name and description, a <strong>Status</strong> badge (e.g. Draft), its <strong>Created</strong> date, and inline actions to <strong>Version, Sign,</strong> or open <strong>Details</strong> — plus a one-click <strong>Create Contract</strong> shortcut.</p>
+        <p class="pitch">Contracts are where a business relationship becomes enforceable, and versioning plus e-signing here means the paper trail is never lost between a founder's inbox and a client's desk — a secure audit trail baked into the workflow itself.</p>
+      </div>
+    </div>
+
+    <div class="subform">
+      <div class="section-head">
+        <span class="index-code">PM-03.1</span>
+        <span class="eyebrow-text">Form</span>
+        <h3>Create New Contract Form</h3>
+      </div>
+      <div class="grid-2 reverse">
+        <div class="frame">
+          <div class="frame-inner">
+            <div class="frame-bar"><i></i><i></i><i></i><span class="path">modal · new-contract</span></div>
+            <img src="page-mockups/new-contract-form-page.png" alt="Create new contract form">
+          </div>
+        </div>
+        <div class="copy">
+          <p>Pick a <strong>Client</strong>, optionally start from a saved <strong>Template</strong>, then set a <strong>Title, Description,</strong> and the full <strong>Content</strong> of the agreement before creating it.</p>
+          <p class="pitch">Letting a template pre-fill this form is the shortcut that turns a one-off legal document into a repeatable business process — write it once, reuse it for every client on that tier.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="tear"><span class="stub">PM-04</span></div>
+
+<!-- ============ TIERS ============ -->
+<section class="page" id="tiers">
+  <div class="wrap reveal">
+    <div class="section-head">
+      <span class="index-code">PM-04</span>
+      <span class="eyebrow-text">Plans &amp; Pricing · Monetization</span>
+      <h2>Subscription Tiers Page</h2>
+    </div>
+    <div class="grid-2">
+      <div class="frame">
+        <div class="frame-inner">
+          <div class="frame-bar"><i></i><i></i><i></i><span class="path">payme.app / tiers</span></div>
+          <img src="page-mockups/tiers-page.png" alt="PayMe subscription tiers page">
+        </div>
+      </div>
+      <div class="copy">
+        <span class="tag">What's on this screen</span>
+        <p>A pricing table listing each plan's <strong>Name, Display Name, Monthly</strong> and <strong>Yearly</strong> price, usage <strong>Limits, Features,</strong> and <strong>Status</strong> — empty until an <strong>Add Tier</strong> defines the first plan.</p>
+        <p class="pitch">This is the flexible subscription-plan engine at the heart of PayMe's pitch: instead of hard-coding "Basic / Pro / Enterprise" into a codebase, any business can design and adjust its own recurring-revenue ladder from a UI.</p>
+      </div>
+    </div>
+
+    <div class="subform">
+      <div class="section-head">
+        <span class="index-code">PM-04.1</span>
+        <span class="eyebrow-text">Form</span>
+        <h3>Create New Tier Form</h3>
+      </div>
+      <div class="duo">
+        <div class="frame">
+          <div class="frame-inner">
+            <div class="frame-bar"><i></i><i></i><i></i><span class="path">modal · new-tier (1/2)</span></div>
+            <img src="page-mockups/new-tier-one-form-page.png" alt="Create new tier form, basic information and pricing">
+          </div>
+        </div>
+        <div class="frame">
+          <div class="frame-inner">
+            <div class="frame-bar"><i></i><i></i><i></i><span class="path">modal · new-tier (2/2)</span></div>
+            <img src="page-mockups/new-tier-two-form-page.png" alt="Create new tier form, usage limits and features">
+          </div>
+        </div>
+      </div>
+      <div class="copy" style="margin-top:26px;">
+        <p>The top half sets <strong>Basic Information</strong> — a system <strong>Name</strong> and a customer-facing <strong>Display Name</strong> — plus <strong>Monthly</strong> and <strong>Yearly Pricing</strong>, with a built-in hint to price the annual plan at roughly a 20% discount. Scrolling down, <strong>Usage Limits</strong> cap <strong>Max Clients, Max Contracts,</strong> and <strong>Max Templates</strong> (or unlimited via <code>-1</code>), and a <strong>Features</strong> list is built one tag at a time.</p>
+        <p class="pitch">Pricing, limits, and features in one form is what makes the platform genuinely modular and easily customizable — any business can define exactly what "Basic" versus "Enterprise" means for them, without a single line of code.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="tear"><span class="stub">PM-05</span></div>
+
+<!-- ============ INVOICES ============ -->
+<section class="page" id="invoices">
+  <div class="wrap reveal">
+    <div class="section-head">
+      <span class="index-code">PM-05</span>
+      <span class="eyebrow-text">Billing · Cash Flow</span>
+      <h2>Invoices Page</h2>
+    </div>
+    <div class="grid-2">
+      <div class="frame">
+        <div class="frame-inner">
+          <div class="frame-bar"><i></i><i></i><i></i><span class="path">payme.app / invoices</span></div>
+          <img src="page-mockups/invoices-page.png" alt="PayMe invoices page">
+        </div>
+      </div>
+      <div class="copy">
+        <span class="tag">What's on this screen</span>
+        <p>A running ledger of billing activity: <strong>Client, Amount, Status</strong> (e.g. draft), and <strong>Due Date</strong> for every invoice, with a <strong>Create Invoice</strong> button ready for the next one.</p>
+        <p class="pitch">This is where recurring revenue becomes real, collectible cash — professional invoices generated in seconds, with statuses that make payment reconciliation something the system tracks instead of something a founder chases over email.</p>
+      </div>
+    </div>
+
+    <div class="subform">
+      <div class="section-head">
+        <span class="index-code">PM-05.1</span>
+        <span class="eyebrow-text">Form</span>
+        <h3>Create New Invoice Form</h3>
+      </div>
+      <div class="grid-2 reverse">
+        <div class="frame">
+          <div class="frame-inner">
+            <div class="frame-bar"><i></i><i></i><i></i><span class="path">modal · new-invoice</span></div>
+            <img src="page-mockups/new-invoice-form-page.png" alt="Create new invoice form">
+          </div>
+        </div>
+        <div class="copy">
+          <p>Select the <strong>Client</strong>, give the invoice a <strong>Title</strong>, set the <strong>Amount</strong> and a <strong>Due Date</strong>, then generate it — no separate billing tool required.</p>
+          <p class="pitch">Paired with the planned Stripe integration and secure webhook processing, this small form is the seed of a full payments pipeline — from "invoice created" to "payment received" in one connected system.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="tear"><span class="stub">PM-06</span></div>
+
+<!-- ============ TEMPLATES ============ -->
+<section class="page" id="templates">
+  <div class="wrap reveal">
+    <div class="section-head">
+      <span class="index-code">PM-06</span>
+      <span class="eyebrow-text">Reusable Documents · Standardization</span>
+      <h2>Contract Templates Page</h2>
+    </div>
+    <div class="grid-2">
+      <div class="frame">
+        <div class="frame-inner">
+          <div class="frame-bar"><i></i><i></i><i></i><span class="path">payme.app / templates</span></div>
+          <img src="page-mockups/templates-page.png" alt="PayMe contract templates page">
+        </div>
+      </div>
+      <div class="copy">
+        <span class="tag">What's on this screen</span>
+        <p>A library table of reusable agreements, organized by <strong>Name, Description,</strong> and the <strong>Tier</strong> they're linked to, with an <strong>Add Template</strong> action to grow the library.</p>
+        <p class="pitch">Templates are the shortcut between "Contracts" and "Tiers" — write the standard agreement for a pricing plan once, and every new client on that plan starts from a polished, consistent document instead of a blank page.</p>
+      </div>
+    </div>
+
+    <div class="subform">
+      <div class="section-head">
+        <span class="index-code">PM-06.1</span>
+        <span class="eyebrow-text">Form</span>
+        <h3>Create New Template Form</h3>
+      </div>
+      <div class="grid-2 reverse">
+        <div class="frame">
+          <div class="frame-inner">
+            <div class="frame-bar"><i></i><i></i><i></i><span class="path">modal · new-template</span></div>
+            <img src="page-mockups/new-tenplate-form-page.png" alt="Create new template form">
+          </div>
+        </div>
+        <div class="copy">
+          <p>Set a <strong>Name</strong>, optionally link it to a <strong>Tier</strong>, add a short <strong>Description</strong>, then draft the full template <strong>Content</strong> that future contracts will inherit.</p>
+          <p class="pitch">This closes the loop across the whole platform — clients, tiers, contracts, and templates all reference one another, so the business logic of "who gets billed what, on what terms" stays consistent everywhere it appears.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="tear"><span class="stub">// resources</span></div>
+
+<!-- ============ STACK ============ -->
+<section class="page" id="stack">
+  <div class="wrap reveal">
+    <div class="section-head">
+      <span class="index-code">PM-07</span>
+      <span class="eyebrow-text">Under the Hood</span>
+      <h2>Technology &amp; Resources Used</h2>
+    </div>
+    <p style="color:var(--text-muted); max-width:70ch; margin-top:-10px;">Every screen above is powered by a stack chosen for reliability and scale — modular enough to deploy in the cloud or self-hosted, while keeping every business in ownership of its own data.</p>
+
+    <div class="stack-grid">
+      <div class="stack-card">
+        <div class="icon">BE</div>
+        <h4>Backend</h4>
+        <ul>
+          <li>Django</li>
+          <li>Django REST Framework</li>
+          <li>PostgreSQL</li>
+        </ul>
+      </div>
+      <div class="stack-card">
+        <div class="icon">$</div>
+        <h4>Payments</h4>
+        <ul>
+          <li>Stripe Integration</li>
+          <li>Secure Webhook Processing</li>
+        </ul>
+      </div>
+      <div class="stack-card">
+        <div class="icon">FE</div>
+        <h4>Frontend</h4>
+        <ul>
+          <li>React</li>
+          <li>Responsive User Interface</li>
+        </ul>
+      </div>
+      <div class="stack-card">
+        <div class="icon">🔒</div>
+        <h4>Security</h4>
+        <ul>
+          <li>JWT Authentication</li>
+          <li>Audit Logging</li>
+          <li>Role-Based Access Control</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ VISION ============ -->
+<section class="vision reveal">
+  <div class="wrap">
+    <span class="eyebrow-text">The Vision</span>
+    <h2>Launching a subscription business should be as simple as <span class="grad">launching a website.</span></h2>
+    <p>PayMe exists so entrepreneurs, startups, and growing enterprises can monetize their products efficiently, securely, and at scale — while the platform quietly manages the complexity of recurring revenue underneath.</p>
+    <div class="future-tags">
+      <span class="chip">Multi-Payment Gateways</span>
+      <span class="chip">M-Pesa &amp; PayPal</span>
+      <span class="chip">AI Revenue Forecasting</span>
+      <span class="chip">Automated Tax Calculation</span>
+      <span class="chip">Multi-Currency Billing</span>
+      <span class="chip">Customer Self-Service Portal</span>
+      <span class="chip">ERP &amp; Accounting Integrations</span>
+    </div>
+  </div>
+</section>
+
+<footer>
+  © 2026 PayMe — Subscription &amp; Invoice Management Platform. Secure contract management.
+</footer>
+
+<script>
+  const revealEls = document.querySelectorAll('.reveal:not(.in)');
+  if ('IntersectionObserver' in window){
+    const io = new IntersectionObserver((entries)=>{
+      entries.forEach(entry=>{
+        if(entry.isIntersecting){
+          entry.target.classList.add('in');
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -60px 0px' });
+    revealEls.forEach(el=>io.observe(el));
+  } else {
+    revealEls.forEach(el=>el.classList.add('in'));
+  }
+</script>
+
+</body>
 </html>  
+
