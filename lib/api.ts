@@ -170,14 +170,14 @@ class ApiClient {
     return this.request(`/payments/milestones/${id}/`);
   }
 
-  async updateMilestone(id: any, milestoneData : any) {
+  async updateMilestone(id: any, milestoneData: any) {
     return this.request(`/payments/milestones/${id}/`, {
       method: "PUT",
       body: JSON.stringify(milestoneData),
     });
   }
 
-  async deleteMilestone(id : any) {
+  async deleteMilestone(id: any) {
     return this.request(`/payments/milestones/${id}/`, {
       method: "DELETE",
     });
@@ -227,6 +227,12 @@ class ApiClient {
     return this.request("/payments/invoices/", {
       method: "POST",
       body: JSON.stringify(invoiceData),
+    });
+  }
+
+  async createInvoiceCheckoutSession(id: any) {
+    return this.request(`/payments/invoices/${id}/create_checkout_session/`, {
+      method: "POST",
     });
   }
 
