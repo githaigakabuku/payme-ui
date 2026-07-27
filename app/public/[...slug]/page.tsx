@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import api from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, Clock, FileDown, AlertTriangle, Sparkles } from "lucide-react";
+import DOMPurify from "isomorphic-dompurify";
 
 interface ClientData {
   client: {
@@ -150,7 +151,7 @@ export default function PublicContractView() {
               <div className="glass-light rounded-xl p-6">
                 <div
                   className="prose prose-sm prose-invert max-w-none [&_*]:text-foreground/90"
-                  dangerouslySetInnerHTML={{ __html: data.contract.current_version.content }}
+                  dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(data.contract.current_version.content) }}
                 />
               </div>
             </div>
