@@ -34,8 +34,9 @@ export default function AdminTemplates() {
     defaultValues: {
       name: "",
       description: "",
-      content: "",
-      tier: "",
+      template_content: "",
+      required_tier: "",
+      category: "",
     },
   });
 
@@ -76,8 +77,11 @@ export default function AdminTemplates() {
   const onSubmit = async (data: any) => {
     try {
       await api.createTemplate({
-        ...data,
-        tier: data.tier || undefined,
+        name: data.name,
+        description: data.description,
+        template_content: data.template_content,
+        required_tier: data.required_tier,
+        category: data.category || undefined,
       });
       setIsDialogOpen(false);
       form.reset();
@@ -132,10 +136,10 @@ export default function AdminTemplates() {
                   />
                   <FormField
                     control={form.control}
-                    name="tier"
+                    name="required_tier"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Tier (Optional)</FormLabel>
+                        <FormLabel>Tier (Required)</FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                           <FormControl>
                             <SelectTrigger>
@@ -143,7 +147,6 @@ export default function AdminTemplates() {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="none">No specific tier</SelectItem>
                             {tiers.map((tier) => (
                               <SelectItem key={tier.id} value={tier.id}>
                                 {tier.name}
@@ -170,13 +173,26 @@ export default function AdminTemplates() {
                   />
                   <FormField
                     control={form.control}
-                    name="content"
+                    name="category"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Content</FormLabel>
+                        <FormLabel>Category (Optional)</FormLabel>
+                        <FormControl>
+                          <Input placeholder="e.g., Service Agreement, NDA, Consulting" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="template_content"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Template Content</FormLabel>
                         <FormControl>
                           <Textarea
-                            placeholder="Enter contract template content..."
+                            placeholder="Enter contract template content with placeholders like {{client_name}}..."
                             className="min-h-[300px] font-mono text-sm"
                             {...field}
                           />
