@@ -136,6 +136,20 @@ export default function AdminInvoices() {
     }
   };
 
+  const getClientName = (client: any): string => {
+    try {
+      if (!client) return "Unknown";
+      if (typeof client === "object" && client.name) return client.name;
+      if (typeof client === "string") {
+        const found = clients.find((c) => c.id === client);
+        return found?.name || "Unknown";
+      }
+      return "Unknown";
+    } catch {
+      return "Unknown";
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     const normalized = status?.toLowerCase() || "";
     if (normalized.includes("paid")) {
@@ -300,7 +314,7 @@ export default function AdminInvoices() {
                   return (
                     <TableRow key={invoice.id}>
                       <TableCell className="font-medium">{invoice.title}</TableCell>
-                      <TableCell>{invoice.client?.name || "Unknown"}</TableCell>
+                      <TableCell>{getClientName(invoice.client)}</TableCell>
                       <TableCell>${Number(invoice.amount).toFixed(2)}</TableCell>
                       <TableCell>
                         <span className={`px-2 py-1 rounded-full text-xs ${status.className}`}>
