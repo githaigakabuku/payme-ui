@@ -19,8 +19,10 @@ interface Template {
   id: string;
   name: string;
   description: string;
-  content: string;
-  tier?: { id: string; name: string };
+  template_content: string;
+  required_tier: string;
+  required_tier_display?: string;
+  category?: string;
   created_at: string;
 }
 
@@ -118,7 +120,7 @@ export default function AdminTemplates() {
 
   const openPreview = (template: Template) => {
     setPreviewTemplate(template);
-    const placeholders = extractPlaceholders(template.content || "");
+    const placeholders = extractPlaceholders(template.template_content || "");
     const defaultData: Record<string, string> = {};
     placeholders.forEach((p) => {
       // Provide sensible defaults based on placeholder name
@@ -131,7 +133,7 @@ export default function AdminTemplates() {
       else defaultData[p] = `[${p}]`;
     });
     setPreviewData(defaultData);
-    setRenderedContent(renderTemplate(template.content || "", defaultData));
+    setRenderedContent(renderTemplate(template.template_content || "", defaultData));
     setIsPreviewOpen(true);
   };
 
@@ -139,13 +141,13 @@ export default function AdminTemplates() {
     const newData = { ...previewData, [key]: value };
     setPreviewData(newData);
     if (previewTemplate) {
-      setRenderedContent(renderTemplate(previewTemplate.content || "", newData));
+      setRenderedContent(renderTemplate(previewTemplate.template_content || "", newData));
     }
   };
 
   const handleDownloadPDF = async (template: Template) => {
     // Use the rendered content if available, otherwise render with defaults
-    const content = template.content || "";
+    const content = template.template_content || "";
     const placeholders = extractPlaceholders(content);
     const data: Record<string, string> = {};
     placeholders.forEach((p) => {
@@ -352,7 +354,7 @@ export default function AdminTemplates() {
                   <TableRow key={template.id}>
                     <TableCell className="font-medium">{template.name}</TableCell>
                     <TableCell>{template.description}</TableCell>
-                    <TableCell>{template.tier?.name || "All"}</TableCell>
+                    <TableCell>{template.required_tier_display || "All"}</TableCell>
                     <TableCell>
                       <div className="flex items-center justify-end gap-1.5">
                         <Button
