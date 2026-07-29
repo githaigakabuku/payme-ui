@@ -137,17 +137,14 @@ export default function AdminInvoices() {
   };
 
   const getClientName = (client: any): string => {
-    try {
-      if (!client) return "Unknown";
-      if (typeof client === "object" && client.name) return client.name;
-      if (typeof client === "string") {
-        const found = clients.find((c) => c.id === client);
-        return found?.name || "Unknown";
-      }
-      return "Unknown";
-    } catch {
-      return "Unknown";
+    if (!client) return "—";
+    if (typeof client === "object" && client.name) return client.name;
+    if (typeof client === "object" && client.id) return client.id;
+    if (typeof client === "string") {
+      const found = clients.find((c) => c.id === client);
+      return found?.name || client;
     }
+    return String(client);
   };
 
   const getStatusBadge = (status: string) => {
